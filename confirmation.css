@@ -1,0 +1,38 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #e6e8e6;
+  text-align: center;
+  color: #2e7d32;
+}
+
+header {
+  background-color: #2e7d32;
+  color: rgb(218, 218, 218);
+  padding: 20px;
+}
+
+.confirmation {
+  margin-top: 60px;
+}
+
+.confirmation img {
+  width: 120px;
+  height: auto;
+}
+
+.confirmation h2 {
+  font-size: 28px;
+  margin: 20px 0 10px;
+}
+
+.confirmation p {
+  font-size: 18px;
+  color: #333;
+}
+
+footer {
+  margin-top: 50px;
+  padding: 15px;
+  background: #2a2727;
+  color: #555;
+}

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GrabnGo - Rent or Buy Vehicles</title>
+  <link rel="icon " href="logo white.jpeg">
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js"></script>
+</head>
+<body>
+  <header>
+    
+      
+      
+      <h1> 
+        <img src="logo.jpeg" alt="icon" style="width: 30px; height: 30px; vertical-align: middle;"> GrabnGo</h1>
+    
+      <nav>
+        <ul>
+          <li><a href="#rent">Rent</a></li>
+          <li><a href="#buy">Buy</a></li>
+          <li><a href="#testimonials">Reviews</a></li>
+          <li><a href="#contact">Contact</a></li>
+          <li>   <div class="container nav-flex">
+      <!-- Categories Dropdown -->
+      <div class="dropdown">
+        <button onclick="toggleDropdown()" class="dropbtn">Categories</button>
+        <div id="dropdownContent" class="dropdown-content">
+          <a href="bike.html">Bikes</a>
+          <a href="car.html">Cars</a>
+          <a href="drone.html">Drones</a>
+          <a href="camera.html">Camera</a>
+        </div>
+      </div></li>
+      <li>
+          <button onclick="toggleAuthModal()" class="btn auth-btn">Login / Sign Up</button>
+        </li>
+        </ul>
+      </nav>
+    
+    </div>
+</span>
+  </header>
+  <div id="authModal" class="auth-modal hidden">
+    <div class="auth-modal-content">
+      <span class="close" onclick="toggleAuthModal()">&times;</span>
+      <div class="form-toggle">
+        <button class="btn" onclick="showForm('login')">Login</button>
+        <button class="btn secondary" onclick="showForm('signup')">Sign Up</button>
+      </div>
+
+      <form id="loginForm" class="auth-form">
+        <input type="text" placeholder="Username" name="username" required />
+        <input type="password" placeholder="Password" name="password" required />
+        <button type="submit" class="btn">Login</button>
+      </form>
+
+      <form id="signupForm" class="auth-form hidden">
+        <input type="text" placeholder="Username" name="username" required />
+        <input type="password" placeholder="Password" name="password" required />
+        <button type="submit" class="btn secondary">Sign Up</button>
+      </form>
+
+      <p id="responseMsg"></p>
+    </div>
+  </div>
+
+  <section class="hero">
+    <div class="container">
+      <h2>Your Vehicle, Your Way</h2>
+      <p>Rent or buy bikes, scooters, cars, and drones at unbeatable prices.</p>
+      <a href="#rent" class="btn">Start Renting</a>
+      <a href="#buy" class="btn secondary">Shop to Own</a>
+    </div>
+  </section>
+
+  
+  <section id="rent" class="vehicles" >
+  
+    <div class="container">
+      <h3 style="color: white;">🛵 Available for Rent</h3>
+      <div class="grid">
+        <div class="card">
+          <img src="motorbike.jpg" alt="Bike" />
+          <h4>Motor Bike</h4>
+          <p><strong>$20/day</strong></p>
+
+          <ul>
+            <li>21 Gears</li>
+              
+            <li>Shock Absorbers</li>
+            <li>Helmet Included</li>
+          </ul>
+          <a href="last page.html"> <button> Rent now</button></a>
+        </div>
+        <div class="card">
+          <img src="electric scotter.jpg" alt="Scooter" />
+          <h4>Electric Scooter</h4>
+          <p><strong>$15/day</strong></p>
+          <ul>
+            <li>40km range</li>
+            <li>Fast charging</li>
+            <li>Lightweight</li>
+          </ul>
+          <a href="last page.html"> <button> Rent now</button></a>
+        </div>
+        <div class="card">
+          <img src="drone.jpg" alt="Drone" />
+          <h4>DJI Drone</h4>
+          <p><strong>$30/day</strong></p>
+          <ul>
+            <li>4K Camera</li>
+            <li>GPS & Auto Return</li>
+            <li>20-min Flight Time</li>
+          </ul>
+          <a href="last page.html"> <button> Rent now</button></a>
+        </div>
+      </div>
+    </div>
+  
+  </section>
+
+  <section id="buy" class="vehicles alt">
+    <div class="container">
+      <h3 style="color: white;">🚘 Available for Purchase</h3>
+      <div class="grid">
+        <div class="card">
+          <img src="honda civic.jpg" alt="Used Car" />
+          <h4>2018 Honda Civic</h4>
+          <p><strong>$12,000</strong></p>
+          <ul>
+            <li>Automatic</li>
+            <li>Low Mileage</li>
+            <li>1-Year Warranty</li>
+          </ul>
+          <button>Buy</button>
+        </div>
+        <div class="card">
+          <img src="hybrid bike.jpg" alt="Bike" />
+          <h4>Hybrid Bike</h4>
+          <p><strong>$450</strong></p>
+          <ul>
+            <li>Dual Suspension</li>
+            <li>City + Trail Ready</li>
+            <li>2-Year Warranty</li>
+          </ul>
+          <button>Buy</button>
+        </div>
+        <div class="card">
+          <img src="drone pro.jpg" alt="Camera Drone" />
+          <h4>Pro Camera Drone</h4>
+          <p><strong>$899</strong></p>
+          <ul>
+            <li>60fps 4K Camera</li>
+            <li>Obstacle Avoidance</li>
+            <li>Carry Case Included</li>
+          </ul>
+          <button>Buy</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="testimonials" class="testimonials">
+    <div class="container">
+      <h3>💬 What Customers Say</h3>
+      <div class="grid">
+        <blockquote>
+          “Best rental service! Got a drone for my shoot and it was flawless.”<br><span>- Aisha</span>
+        </blockquote>
+        <blockquote>
+          “I bought a used car through DriveAway, and it’s in amazing condition.”<br><span>- Rahul</span>
+        </blockquote>
+        <blockquote>
+          “The electric scooter was fun, affordable, and arrived fully charged.”<br><span>- Emily</span>
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+
+
+  <footer>
+  
+      
+      <section id="About" class="About">
+        <div class="about">
+        <h4>About GrabnGo</h4>
+        <p>
+          GrabnGo is your go-to platform to rent or buy motorbikes, drones, cameras, and cars at affordable prices. Whether you're traveling, exploring, or working, we’ve got the right vehicle for your journey.
+        </p>
+          <p>&copy; 2025 GrabnGo. All rights reserved.</p>
+      
+      </div>
+      </section>
+  </footer>
+
+  <section id="contact" class="contact">
+    <div class="container">
+      <h3>📞 Contact Us</h3>
+      <p>Email: hello@driveaway.com</p>
+      <p>Phone: +123 456 7890</p>
+      <p>Location: 101 Mobility Lane, SmartCity</p>
+    </div>
+  </section>
+  
+</body>
+</html>
