@@ -1,0 +1,12 @@
+/* Leaflet Core CSS - Required for maps to display properly */
+@import 'leaflet/dist/leaflet.css';
+
+/* Additional Leaflet custom styles */
+.leaflet-container {
+  font-family: inherit;
+}
+
+/* Fix for marker icons */
+.leaflet-default-icon-path {
+  background-image: url('https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png');
+}
