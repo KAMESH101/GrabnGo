@@ -209,7 +209,7 @@ export const TestAccounts: React.FC = () => {
     }
 
     try {
-      forceReseedBookings();
+      handleForceReseedBookings();
       toast.success('Bookings data reset successfully! Fresh sample data loaded.');
       loadMockAccounts();
       
