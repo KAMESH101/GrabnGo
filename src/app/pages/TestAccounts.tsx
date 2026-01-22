@@ -8,7 +8,7 @@ import { getAllUsers, getAllBookings } from '../services/database';
 import { User as UserType } from '../types';
 import { toast } from 'sonner';
 import { clearDatabase, seedDatabase } from '../utils/seedData';
-import logo from 'figma:asset/94de451d9fc4b0339762ad04b304997b5a5a9bd4.png';
+import logo from '../../assets/94de451d9fc4b0339762ad04b304997b5a5a9bd4.png';
 
 interface TestAccount {
   name: string;

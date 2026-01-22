@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import logo from 'figma:asset/94de451d9fc4b0339762ad04b304997b5a5a9bd4.png';
+import logo from '../../../assets/94de451d9fc4b0339762ad04b304997b5a5a9bd4.png';
 
 export const Navbar: React.FC = () => {
   const { user, logout, updateCustomerLocation } = useAuth();

@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Category, Product, VerifiedCustomerLocation } from '../../types';
 import { getAvailableProducts, getNearbyProducts } from '../../services/products';
 import { Car, Bike, Camera, Plane, Package, MapPin, Navigation, Loader2 } from 'lucide-react';
-import logo from 'figma:asset/94de451d9fc4b0339762ad04b304997b5a5a9bd4.png';
+import logo from '../../../assets/94de451d9fc4b0339762ad04b304997b5a5a9bd4.png';
 
 export const CustomerHome: React.FC = () => {
   const navigate = useNavigate();
