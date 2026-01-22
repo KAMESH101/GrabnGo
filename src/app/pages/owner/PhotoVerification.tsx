@@ -49,9 +49,13 @@ export const PhotoVerification: React.FC = () => {
 
   // Clean up camera on unmount
   useEffect(() => {
-    return () => {
-      stopCamera();
+    const cleanup = () => {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+        tracks.forEach((track) => track.stop());
+      }
     };
+    return cleanup;
   }, []);
 
   if (isLoading) {
@@ -91,6 +95,8 @@ export const PhotoVerification: React.FC = () => {
         return;
       }
 
+      setCurrentStep('camera-active');
+
       // Request camera permission with front camera
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
@@ -100,12 +106,25 @@ export const PhotoVerification: React.FC = () => {
         } 
       });
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        setCurrentStep('camera-active');
-        setShowPermissionHelp(false);
-        toast.success('Camera started successfully');
-      }
+      // Wait for next tick to ensure video element is rendered
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          setShowPermissionHelp(false);
+          toast.success('Camera started successfully');
+        } else {
+          // Fallback if ref is still null
+          const retryInterval = setInterval(() => {
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+              setShowPermissionHelp(false);
+              toast.success('Camera started successfully');
+              clearInterval(retryInterval);
+            }
+          }, 100);
+          setTimeout(() => clearInterval(retryInterval), 2000);
+        }
+      }, 50);
     } catch (error: any) {
       console.warn('[Camera Access]', error.name || 'Error');
       
