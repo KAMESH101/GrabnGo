@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '../../context/AuthContext';
 import { AdminNavbar } from '../../components/admin/AdminNavbar';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Users, Store, Package, ShoppingBag, CheckCircle, Clock } from 'lucide-react';
+import { Users, Store, Package, ShoppingBag, CheckCircle, Clock, Camera } from 'lucide-react';
 import {
   getAllUsers,
   getAllProducts,
