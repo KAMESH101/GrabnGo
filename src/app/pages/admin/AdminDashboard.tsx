@@ -165,6 +165,15 @@ export const AdminDashboard: React.FC = () => {
             <p className="font-medium">Manage Bookings</p>
             <p className="text-sm text-gray-500 mt-1">{totalBookings} total</p>
           </button>
+
+          <button
+            onClick={() => navigate('/admin/photos')}
+            className="p-4 bg-white border border-gray-200 rounded-lg hover:border-indigo-300 hover:shadow-sm transition-all text-left"
+          >
+            <Camera className="w-5 h-5 text-indigo-600 mb-2" />
+            <p className="font-medium">Photo Archive</p>
+            <p className="text-sm text-gray-500 mt-1">Verification photos</p>
+          </button>
         </div>
       </div>
     </div>

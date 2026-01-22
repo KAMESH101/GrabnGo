@@ -47,6 +47,7 @@ import { AdminBookingManagement } from './pages/admin/BookingManagement';
 import { LocationMonitoring } from './pages/admin/LocationMonitoring';
 import { DataConsistency } from './pages/admin/DataConsistency';
 import { MockAccountCreation } from './pages/admin/MockAccountCreation';
+import { PhotoManagement } from './pages/admin/PhotoManagement';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -204,6 +205,10 @@ const router = createBrowserRouter([
   {
     path: '/admin/mock-account-creation',
     element: <ProtectedRoute allowedRoles={['admin']}><MockAccountCreation /></ProtectedRoute>,
+  },
+  {
+    path: '/admin/photos',
+    element: <ProtectedRoute allowedRoles={['admin']}><PhotoManagement /></ProtectedRoute>,
   },
   {
     path: '/admin/test',
