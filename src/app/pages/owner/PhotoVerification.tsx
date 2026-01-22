@@ -179,6 +179,7 @@ export const PhotoVerification: React.FC = () => {
   const retakePhoto = () => {
     setCapturedPhoto(null);
     setCurrentStep('ready');
+    startCamera();
   };
 
   const confirmPickup = async () => {
