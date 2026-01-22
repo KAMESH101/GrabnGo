@@ -320,10 +320,10 @@ export const PhotoVerification: React.FC = () => {
             <CardHeader>
               <CardTitle>Customer Photo Capture</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-0">
               {/* Step 1: Ready State (Camera NOT Started) */}
               {currentStep === 'ready' && (
-                <div className="space-y-4">
+                <div className="space-y-4 p-6">
                   <div className="bg-indigo-50 aspect-video rounded-lg flex flex-col items-center justify-center p-8 border-2 border-dashed border-indigo-200">
                     <div className="w-20 h-20 rounded-full bg-indigo-100 flex items-center justify-center mb-4">
                       <Camera className="w-10 h-10 text-indigo-600" />
@@ -403,67 +403,68 @@ export const PhotoVerification: React.FC = () => {
 
               {/* Step 2: Camera Active */}
               {currentStep === 'camera-active' && (
-                <div className="space-y-4">
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    playsInline
-                    className="w-full aspect-video rounded-lg bg-black"
-                  />
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={capturePhoto} 
-                      className="flex-1 bg-green-600 hover:bg-green-700"
-                      size="lg"
-                    >
-                      <Camera className="w-5 h-5 mr-2" />
-                      Capture Photo
-                    </Button>
-                    <Button onClick={cancelCamera} variant="outline" size="lg">
-                      Cancel
-                    </Button>
+                <div className="p-0 flex flex-col items-center">
+                  <div className="relative w-full aspect-video bg-black flex items-center justify-center">
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4 px-4">
+                      <Button 
+                        onClick={capturePhoto} 
+                        className="bg-green-600 hover:bg-green-700 shadow-lg"
+                        size="lg"
+                      >
+                        <Camera className="w-5 h-5 mr-2" />
+                        Capture Photo
+                      </Button>
+                      <Button onClick={cancelCamera} variant="secondary" size="lg" className="shadow-lg">
+                        Cancel
+                      </Button>
+                    </div>
                   </div>
-                  <div className="bg-green-50 p-3 rounded text-sm text-center text-green-800">
-                    <p>✓ Camera active - Ask customer to look at the camera</p>
+                  <div className="w-full bg-green-50 p-3 text-sm text-center text-green-800 border-t">
+                    <p>✓ Camera active - Ask customer to look at the lens</p>
                   </div>
                 </div>
               )}
 
               {/* Step 3: Photo Captured */}
               {currentStep === 'photo-captured' && capturedPhoto && (
-                <div className="space-y-4">
-                  <div className="relative">
+                <div className="p-0 flex flex-col items-center">
+                  <div className="relative w-full aspect-video bg-gray-100 flex items-center justify-center">
                     <img
                       src={capturedPhoto}
                       alt="Captured customer photo"
-                      className="w-full aspect-video rounded-lg object-cover"
+                      className="w-full h-full object-cover"
                     />
-                    <div className="absolute top-2 right-2">
-                      <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
+                    <div className="absolute top-4 right-4">
+                      <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1 shadow-md">
                         <CheckCircle className="w-4 h-4" />
                         Captured
                       </span>
                     </div>
+                    <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4 px-4">
+                      <Button 
+                        onClick={confirmPickup} 
+                        className="bg-green-600 hover:bg-green-700 shadow-lg"
+                        size="lg"
+                      >
+                        <ShieldCheck className="w-5 h-5 mr-2" />
+                        Confirm & Activate
+                      </Button>
+                      <Button onClick={retakePhoto} variant="secondary" size="lg" className="shadow-lg">
+                        <RotateCcw className="w-5 h-5 mr-2" />
+                        Retake
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={confirmPickup} 
-                      className="flex-1 bg-green-600 hover:bg-green-700"
-                      size="lg"
-                    >
-                      <ShieldCheck className="w-5 h-5 mr-2" />
-                      Confirm & Activate Rental
-                    </Button>
-                    <Button onClick={retakePhoto} variant="outline" size="lg">
-                      <RotateCcw className="w-5 h-5 mr-2" />
-                      Retake
-                    </Button>
-                  </div>
-                  <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-800">
-                    <p className="mb-1">✓ Photo captured successfully</p>
-                    <p className="text-xs">
-                      Review the photo. Click "Confirm" to verify pickup and activate the rental, 
-                      or "Retake" to capture a new photo.
+                  <div className="w-full bg-blue-50 p-4 text-sm text-blue-800 border-t">
+                    <p className="font-medium">✓ Review the photo</p>
+                    <p className="text-xs mt-1">
+                      Ensure the customer's face is clearly visible before confirming.
                     </p>
                   </div>
                 </div>
@@ -471,7 +472,7 @@ export const PhotoVerification: React.FC = () => {
 
               {/* Step 4: Uploading */}
               {currentStep === 'uploading' && (
-                <div className="space-y-4">
+                <div className="p-6 space-y-4">
                   {capturedPhoto && (
                     <img
                       src={capturedPhoto}
@@ -491,7 +492,7 @@ export const PhotoVerification: React.FC = () => {
 
               {/* Step 5: Success */}
               {currentStep === 'success' && (
-                <div className="space-y-4">
+                <div className="p-6 space-y-4">
                   <div className="bg-green-50 aspect-video rounded-lg flex flex-col items-center justify-center p-8">
                     <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-4">
                       <CheckCircle className="w-12 h-12 text-green-600" />
@@ -502,11 +503,6 @@ export const PhotoVerification: React.FC = () => {
                     <p className="text-center text-sm text-green-700">
                       Rental is now active
                     </p>
-                  </div>
-                  <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-800">
-                    <p className="mb-1">✓ Customer photo uploaded securely</p>
-                    <p className="mb-1">✓ Rental status updated to Active</p>
-                    <p className="text-xs">🔒 Photo will be auto-deleted after rental completion</p>
                   </div>
                 </div>
               )}
