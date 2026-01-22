@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/button';
-import { ShieldCheck, LogOut, LayoutDashboard, Users, Package, ShoppingBag, MapPin, AlertTriangle } from 'lucide-react';
+import { ShieldCheck, LogOut, LayoutDashboard, Users, Package, ShoppingBag, MapPin, AlertTriangle, Camera } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const AdminNavbar: React.FC = () => {
@@ -24,6 +24,7 @@ export const AdminNavbar: React.FC = () => {
     { path: '/admin/products', label: 'Products', icon: Package },
     { path: '/admin/bookings', label: 'Bookings', icon: ShoppingBag },
     { path: '/admin/locations', label: 'Locations', icon: MapPin },
+    { path: '/admin/photos', label: 'Photos', icon: Camera },
     { path: '/admin/data-consistency', label: 'Data Check', icon: AlertTriangle },
   ];
 
