@@ -84,7 +84,7 @@ const generateVerifiedLocation = (locality: any): VerifiedCustomerLocation => {
  */
 const createSampleBookingsForCustomer = (customer: User) => {
   const products = getAllProducts();
-  
+
   // Only create bookings if there are products available
   if (products.length === 0) {
     console.log('⚠️ [MOCK] No products available to create bookings');
@@ -103,16 +103,16 @@ const createSampleBookingsForCustomer = (customer: User) => {
 
   // Create 1-3 random bookings per customer
   const numBookings = Math.floor(Math.random() * 3) + 1; // 1 to 3 bookings
-  
+
   for (let i = 0; i < numBookings; i++) {
     const product = products[Math.floor(Math.random() * products.length)];
     const bookingStatuses: BookingStatus[] = ['confirmed', 'pending', 'completed'];
     const randomStatus = bookingStatuses[Math.floor(Math.random() * bookingStatuses.length)];
-    
+
     // Determine dates based on status
     let startDate: Date;
     let endDate: Date;
-    
+
     if (randomStatus === 'completed') {
       startDate = pastDate;
       endDate = pastReturnDate;
@@ -165,20 +165,20 @@ const createSampleBookingsForCustomer = (customer: User) => {
     });
 
     const createdBooking = createBooking(booking);
-    
+
     console.log(`✅ [MOCK] Booking created in database:`, {
       id: createdBooking.id,
       hasId: !!createdBooking.id,
       matches: createdBooking.id === booking.id
     });
-    
+
     // Add a small delay to ensure unique timestamps
     const delayStart = Date.now();
     while (Date.now() === delayStart) {
       // Wait for timestamp to change
     }
   }
-  
+
   console.log(`✅ [MOCK] Created ${numBookings} sample bookings for ${customer.name}`);
 };
 
@@ -187,43 +187,46 @@ const createSampleBookingsForCustomer = (customer: User) => {
  */
 export const createMockCustomers = (count: number = 10): User[] => {
   console.log(`🤖 [MOCK] Creating ${count} mock customers...`);
-  
+
   const customers: User[] = [];
-  
+
   for (let i = 0; i < count; i++) {
     const firstName = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
     const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
     const locality = CHENNAI_LOCALITIES[Math.floor(Math.random() * CHENNAI_LOCALITIES.length)];
-    
+
     const customer: User = {
       id: `mock_customer_${Date.now()}_${i}`,
       name: `${firstName} ${lastName}`,
       email: generateEmail(firstName, lastName, 'customer', i),
       phone: generatePhoneNumber(),
       role: 'customer',
+      roles: ['customer'],
+      activeRole: 'customer',
+      roleHistory: [],
       city: 'Chennai',
       locality: locality.locality,
       verifiedLocation: generateVerifiedLocation(locality),
     };
-    
+
     createUser(customer);
     customers.push(customer);
-    
+
     // Add a small delay to ensure unique timestamps
     const timestamp = Date.now();
     while (Date.now() === timestamp) {
       // Wait for timestamp to change
     }
   }
-  
+
   console.log(`✅ [MOCK] Created ${customers.length} mock customers`);
-  
+
   // Create sample bookings for each customer
   console.log(`🤖 [MOCK] Creating sample bookings for mock customers...`);
   customers.forEach(customer => {
     createSampleBookingsForCustomer(customer);
   });
-  
+
   return customers;
 };
 
@@ -232,40 +235,43 @@ export const createMockCustomers = (count: number = 10): User[] => {
  */
 export const createMockOwners = (count: number = 5): User[] => {
   console.log(`🤖 [MOCK] Creating ${count} mock owners...`);
-  
+
   const owners: User[] = [];
-  
+
   for (let i = 0; i < count; i++) {
     const firstName = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
     const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
     const shopName = SHOP_NAMES[Math.floor(Math.random() * SHOP_NAMES.length)];
     const locality = CHENNAI_LOCALITIES[Math.floor(Math.random() * CHENNAI_LOCALITIES.length)];
-    
+
     const owner: User = {
       id: `mock_owner_${Date.now()}_${i}`,
       name: `${shopName} (${firstName} ${lastName})`,
       email: generateEmail(firstName, lastName, 'owner', i),
       phone: generatePhoneNumber(),
       role: 'owner',
+      roles: ['owner'],
+      activeRole: 'owner',
+      roleHistory: [],
       city: 'Chennai',
       locality: locality.locality,
       kycDocuments: {
         aadhaar: 'XXXX-XXXX-1234',
         pan: 'ABCDE1234F',
-        drivingLicense: 'TN01234567890',
+        proofDocument: 'TN01234567890',
       },
     };
-    
+
     createUser(owner);
     owners.push(owner);
-    
+
     // Add a small delay to ensure unique timestamps
     const timestamp = Date.now();
     while (Date.now() === timestamp) {
       // Wait for timestamp to change
     }
   }
-  
+
   console.log(`✅ [MOCK] Created ${owners.length} mock owners`);
   return owners;
 };
@@ -275,15 +281,15 @@ export const createMockOwners = (count: number = 5): User[] => {
  */
 export const getMockAccountStats = () => {
   const users = JSON.parse(localStorage.getItem('grabngo_users') || '[]');
-  
-  const mockCustomers = users.filter((u: User) => 
+
+  const mockCustomers = users.filter((u: User) =>
     u.role === 'customer' && u.id.startsWith('mock_customer_')
   );
-  
-  const mockOwners = users.filter((u: User) => 
+
+  const mockOwners = users.filter((u: User) =>
     u.role === 'owner' && u.id.startsWith('mock_owner_')
   );
-  
+
   return {
     mockCustomers: mockCustomers.length,
     mockOwners: mockOwners.length,
@@ -296,21 +302,21 @@ export const getMockAccountStats = () => {
  */
 export const deleteAllMockAccounts = () => {
   console.log('🗑️ [MOCK] Deleting all mock accounts...');
-  
+
   // Delete mock users
   const users = JSON.parse(localStorage.getItem('grabngo_users') || '[]');
-  const filteredUsers = users.filter((u: User) => 
+  const filteredUsers = users.filter((u: User) =>
     !u.id.startsWith('mock_customer_') && !u.id.startsWith('mock_owner_')
   );
   localStorage.setItem('grabngo_users', JSON.stringify(filteredUsers));
-  
+
   // Delete mock bookings
   const bookings = JSON.parse(localStorage.getItem('grabngo_bookings') || '[]');
-  const filteredBookings = bookings.filter((b: Booking) => 
+  const filteredBookings = bookings.filter((b: Booking) =>
     !b.customerId.startsWith('mock_customer_')
   );
   localStorage.setItem('grabngo_bookings', JSON.stringify(filteredBookings));
-  
+
   console.log('✅ [MOCK] All mock accounts and bookings deleted');
 };
 
@@ -321,7 +327,7 @@ export const fixCorruptedBookings = (silent: boolean = false): { fixed: number; 
   if (!silent) {
     console.log('🔧 [MOCK] Checking for corrupted bookings...');
   }
-  
+
   const bookingsRaw = localStorage.getItem('grabngo_bookings');
   if (!bookingsRaw) {
     if (!silent) {
@@ -329,11 +335,11 @@ export const fixCorruptedBookings = (silent: boolean = false): { fixed: number; 
     }
     return { fixed: 0, removed: 0 };
   }
-  
+
   const bookings = JSON.parse(bookingsRaw);
   let fixedCount = 0;
   let removedCount = 0;
-  
+
   const cleanedBookings = bookings.filter((b: any) => {
     // Check if booking has an ID
     if (!b.id || b.id === null || b.id === undefined || b.id === '') {
@@ -343,7 +349,7 @@ export const fixCorruptedBookings = (silent: boolean = false): { fixed: number; 
       removedCount++;
       return false;
     }
-    
+
     // Check for old invalid fields and remove them
     const hadInvalidFields = 'razorpayOrderId' in b || 'razorpayPaymentId' in b;
     if (hadInvalidFields) {
@@ -354,13 +360,13 @@ export const fixCorruptedBookings = (silent: boolean = false): { fixed: number; 
       delete b.razorpayPaymentId;
       fixedCount++;
     }
-    
+
     return true;
   });
-  
+
   // Save cleaned bookings
   localStorage.setItem('grabngo_bookings', JSON.stringify(cleanedBookings));
-  
+
   if (!silent && (fixedCount > 0 || removedCount > 0)) {
     console.log(`✅ [MOCK] Database cleanup complete:`, {
       originalCount: bookings.length,
@@ -369,6 +375,6 @@ export const fixCorruptedBookings = (silent: boolean = false): { fixed: number; 
       removed: removedCount
     });
   }
-  
+
   return { fixed: fixedCount, removed: removedCount };
 };

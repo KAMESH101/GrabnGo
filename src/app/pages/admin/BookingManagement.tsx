@@ -29,7 +29,7 @@ export const AdminBookingManagement: React.FC = () => {
   const loadBookings = () => {
     const allBookings = getAllBookings();
     // Sort by date - newest first
-    const sorted = allBookings.sort((a, b) => 
+    const sorted = allBookings.sort((a, b) =>
       new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
     );
     setBookings(sorted);
@@ -220,11 +220,22 @@ export const AdminBookingManagement: React.FC = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm">
-                            <p className="font-medium text-gray-900">₹{booking.totalAmount}</p>
-                            <p className="text-xs text-gray-500">
-                              Deposit: ₹{booking.deposit}
-                            </p>
+                          <div className="text-sm space-y-1">
+                            <p className="font-medium text-gray-900">Total: ₹{booking.totalAmount}</p>
+                            {booking.advancePaid ? (
+                              <>
+                                <p className="text-xs text-green-600">
+                                  ✓ Advance: ₹{booking.advanceAmount}
+                                </p>
+                                <p className={`text-xs ${booking.remainingPaymentStatus === 'paid_to_owner' ? 'text-green-600' : 'text-orange-600'}`}>
+                                  Remaining: ₹{booking.remainingAmount} ({booking.remainingPaymentStatus === 'paid_to_owner' ? 'Paid ✓' : 'Pending'})
+                                </p>
+                              </>
+                            ) : (
+                              <p className="text-xs text-gray-500">
+                                Deposit: ₹{booking.deposit}
+                              </p>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4">

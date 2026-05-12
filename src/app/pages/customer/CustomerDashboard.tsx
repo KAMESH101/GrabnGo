@@ -48,7 +48,7 @@ export const CustomerDashboard: React.FC = () => {
 
   // Filter bookings by status
   const upcomingBookings = bookings.filter(
-    (b) => b.status === 'confirmed' || b.status === 'pending' || b.status === 'active'
+    (b) => b.status === 'requested' || b.status === 'approved' || b.status === 'confirmed' || b.status === 'pending' || b.status === 'active'
   );
   const pastBookings = bookings.filter((b) => b.status === 'completed' || b.status === 'cancelled' || b.status === 'rejected');
 
@@ -110,11 +110,13 @@ export const CustomerDashboard: React.FC = () => {
                   <Card key={booking.id || `upcoming-${index}`}>
                     <CardContent className="p-6">
                       <div className="flex gap-4">
-                        <img
-                          src={booking.productImage}
-                          alt={booking.productTitle}
-                          className="w-32 h-32 object-cover rounded-lg"
-                        />
+                        <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                          <img
+                            src={booking.productImage}
+                            alt={booking.productTitle}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
                         <div className="flex-1">
                           <div className="flex justify-between mb-2">
                             <h3 className="text-xl">{booking.productTitle}</h3>
@@ -122,6 +124,24 @@ export const CustomerDashboard: React.FC = () => {
                           </div>
 
                           {/* Status-specific alerts */}
+                          {booking.status === 'requested' && (
+                            <Alert className="mb-3 bg-amber-50 border-amber-200">
+                              <Clock className="h-4 w-4 text-amber-600" />
+                              <AlertDescription className="text-amber-800 text-sm">
+                                ⏳ Booking request sent. Waiting for owner approval.
+                              </AlertDescription>
+                            </Alert>
+                          )}
+
+                          {booking.status === 'approved' && (
+                            <Alert className="mb-3 bg-blue-50 border-blue-200">
+                              <CheckCircle className="h-4 w-4 text-blue-600" />
+                              <AlertDescription className="text-blue-800 text-sm">
+                                ✅ Owner approved your request! Please pay the advance to confirm your booking.
+                              </AlertDescription>
+                            </Alert>
+                          )}
+
                           {booking.status === 'pending' && (
                             <Alert className="mb-3 bg-amber-50 border-amber-200">
                               <Clock className="h-4 w-4 text-amber-600" />
@@ -135,7 +155,7 @@ export const CustomerDashboard: React.FC = () => {
                             <Alert className="mb-3 bg-green-50 border-green-200">
                               <CheckCircle className="h-4 w-4 text-green-600" />
                               <AlertDescription className="text-green-800 text-sm">
-                                ✅ Approved by owner! Please visit the pickup location to collect the item.
+                                ✅ Booking confirmed! Please visit the pickup location to collect the item.
                               </AlertDescription>
                             </Alert>
                           )}
@@ -187,6 +207,17 @@ export const CustomerDashboard: React.FC = () => {
                             >
                               View Details
                             </Button>
+                            {/* 'approved' bookings: shortcut Pay Advance button */}
+                            {booking.status === 'approved' && (
+                              <Button
+                                size="sm"
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                                onClick={() => handleViewDetails(booking.id)}
+                              >
+                                <CreditCard className="w-4 h-4 mr-1" />
+                                Pay Advance
+                              </Button>
+                            )}
                             <Button
                               size="sm"
                               variant="destructive"
@@ -225,11 +256,13 @@ export const CustomerDashboard: React.FC = () => {
                   <Card key={booking.id || `past-${index}`}>
                     <CardContent className="p-6">
                       <div className="flex gap-4">
-                        <img
-                          src={booking.productImage}
-                          alt={booking.productTitle}
-                          className="w-32 h-32 object-cover rounded-lg"
-                        />
+                        <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                          <img
+                            src={booking.productImage}
+                            alt={booking.productTitle}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
                         <div className="flex-1">
                           <div className="flex justify-between mb-2">
                             <h3 className="text-xl">{booking.productTitle}</h3>

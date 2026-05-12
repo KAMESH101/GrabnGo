@@ -7,7 +7,7 @@ import { Booking } from '../../types';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { StatusBadge } from '../shared/StatusBadge';
-import { Calendar, User, Phone, Camera, CheckCircle, XCircle, Loader } from 'lucide-react';
+import { Calendar, User, Phone, Camera, CheckCircle, XCircle, Loader, IndianRupee, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -18,6 +18,7 @@ interface OwnerBookingRowProps {
   onReject: (bookingId: string) => void;
   onStartRental: (bookingId: string) => void;
   onCompleteRental: (bookingId: string) => void;
+  onConfirmRemainingPayment: (bookingId: string) => void;
 }
 
 export const OwnerBookingRow: React.FC<OwnerBookingRowProps> = ({
@@ -27,7 +28,13 @@ export const OwnerBookingRow: React.FC<OwnerBookingRowProps> = ({
   onReject,
   onStartRental,
   onCompleteRental,
+  onConfirmRemainingPayment,
 }) => {
+  const remainingPaymentPending =
+    booking.status === 'active' &&
+    booking.pickupVerified &&
+    booking.advancePaid &&
+    booking.remainingPaymentStatus !== 'paid_to_owner';
   const navigate = useNavigate();
 
   const handleViewDetails = () => {
@@ -39,13 +46,13 @@ export const OwnerBookingRow: React.FC<OwnerBookingRowProps> = ({
       hasId: !!booking.id,
       bookingObject: booking
     });
-    
+
     if (!booking.id) {
       console.error('❌ [OWNER BOOKING ROW] Invalid booking ID - Booking object:', booking);
       toast.error('Cannot view details: Booking ID is missing');
       return;
     }
-    
+
     console.log('✅ [OWNER BOOKING ROW] Navigating to:', `/owner/booking/${booking.id}`);
     navigate(`/owner/booking/${booking.id}`);
   };
@@ -54,11 +61,13 @@ export const OwnerBookingRow: React.FC<OwnerBookingRowProps> = ({
     <Card>
       <CardContent className="p-6">
         <div className="flex gap-4">
-          <img
-            src={booking.productImage}
-            alt={booking.productTitle}
-            className="w-32 h-32 object-cover rounded-lg"
-          />
+          <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+            <img
+              src={booking.productImage}
+              alt={booking.productTitle}
+              className="w-full h-full object-contain"
+            />
+          </div>
           <div className="flex-1">
             <div className="flex justify-between mb-3">
               <div>
@@ -129,11 +138,12 @@ export const OwnerBookingRow: React.FC<OwnerBookingRowProps> = ({
             )}
 
             <div className="flex gap-2 flex-wrap">
-              {booking.status === 'pending' && (
+              {/* Show Approve / Reject for 'requested' bookings (no payment taken yet) */}
+              {(booking.status === 'requested' || booking.status === 'pending') && (
                 <>
-                  <Button 
-                    size="sm" 
-                    onClick={() => onAccept(booking.id)} 
+                  <Button
+                    size="sm"
+                    onClick={() => onAccept(booking.id)}
                     className="bg-green-600 hover:bg-green-700"
                     disabled={processingBooking === booking.id}
                   >
@@ -142,11 +152,11 @@ export const OwnerBookingRow: React.FC<OwnerBookingRowProps> = ({
                     ) : (
                       <CheckCircle className="w-4 h-4 mr-1" />
                     )}
-                    Approve & Notify
+                    Approve Request
                   </Button>
-                  <Button 
-                    size="sm" 
-                    variant="destructive" 
+                  <Button
+                    size="sm"
+                    variant="destructive"
                     onClick={() => onReject(booking.id)}
                     disabled={processingBooking === booking.id}
                   >
@@ -155,27 +165,85 @@ export const OwnerBookingRow: React.FC<OwnerBookingRowProps> = ({
                     ) : (
                       <XCircle className="w-4 h-4 mr-1" />
                     )}
-                    Reject & Refund
+                    Reject Request
                   </Button>
                 </>
               )}
-              {booking.status === 'active' && booking.pickupVerified && (
-                <Button 
-                  size="sm" 
-                  onClick={() => onCompleteRental(booking.id)} 
-                  className="bg-indigo-600 hover:bg-indigo-700"
+
+              {/* 'confirmed' = owner approved + advance paid — owner can start rental */}
+              {booking.status === 'confirmed' && (
+                <Button
+                  size="sm"
+                  onClick={() => onStartRental(booking.id)}
+                  className="bg-blue-600 hover:bg-blue-700"
                   disabled={processingBooking === booking.id}
                 >
-                  {processingBooking === booking.id ? (
-                    <Loader className="w-4 h-4 mr-1 animate-spin" />
-                  ) : (
-                    <CheckCircle className="w-4 h-4 mr-1" />
-                  )}
-                  Complete & Delete Photo
+                  <Camera className="w-4 h-4 mr-1" />
+                  Start Rental &amp; Verify
                 </Button>
               )}
-              <Button 
-                size="sm" 
+              {booking.status === 'active' && booking.pickupVerified && (() => {
+                const rps = booking.remainingPaymentStatus;
+                const isPaidOnline = rps === 'paid_online';
+                const isPaidCash   = rps === 'paid_cash' || rps === 'paid_to_owner';
+                const isPaid       = isPaidOnline || isPaidCash;
+
+                if (!isPaid) {
+                  // STATE 1 — Remaining pending, waiting for customer to pay online or cash
+                  return (
+                    <>
+                      <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 text-sm text-orange-800">
+                        <AlertCircle className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                        <span>
+                          Remaining <strong>₹{booking.remainingAmount ?? ''}</strong> not yet paid
+                        </span>
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => onConfirmRemainingPayment(booking.id)}
+                        className="bg-orange-500 hover:bg-orange-600 text-white"
+                        disabled={processingBooking === booking.id}
+                      >
+                        {processingBooking === booking.id ? (
+                          <Loader className="w-4 h-4 mr-1 animate-spin" />
+                        ) : (
+                          <IndianRupee className="w-4 h-4 mr-1" />
+                        )}
+                        Confirm Cash Payment
+                      </Button>
+                    </>
+                  );
+                }
+
+                // STATE 2 — Paid online / STATE 3 — Paid cash → show Complete button
+                return (
+                  <>
+                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
+                      isPaidOnline
+                        ? 'bg-blue-50 border border-blue-300 text-blue-700'
+                        : 'bg-green-50 border border-green-300 text-green-700'
+                    }`}>
+                      <CheckCircle className="w-4 h-4" />
+                      {isPaidOnline ? 'Remaining Paid Online ✔' : 'Cash Payment Confirmed ✔'}
+                    </span>
+                    <Button
+                      size="sm"
+                      onClick={() => onCompleteRental(booking.id)}
+                      className="bg-indigo-600 hover:bg-indigo-700"
+                      disabled={processingBooking === booking.id}
+                    >
+                      {processingBooking === booking.id ? (
+                        <Loader className="w-4 h-4 mr-1 animate-spin" />
+                      ) : (
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                      )}
+                      Complete & Delete Photo
+                    </Button>
+                  </>
+                );
+              })()}
+              <Button
+                size="sm"
                 variant="outline"
                 onClick={handleViewDetails}
               >
@@ -184,11 +252,32 @@ export const OwnerBookingRow: React.FC<OwnerBookingRowProps> = ({
             </div>
 
             {/* Payment & Photo Info */}
-            {booking.paymentStatus && (
-              <div className="mt-3 pt-3 border-t flex gap-4 text-xs">
-                <span className="text-gray-600">
-                  Payment: <span className="text-green-600">{booking.paymentStatus.toUpperCase()}</span>
-                </span>
+            {(booking.paymentStatus || booking.advancePaid) && (
+              <div className="mt-3 pt-3 border-t flex gap-4 text-xs flex-wrap">
+                {booking.paymentStatus && (
+                  <span className="text-gray-600">
+                    Payment: <span className="text-green-600">{booking.paymentStatus.toUpperCase()}</span>
+                  </span>
+                )}
+                {booking.advancePaid && booking.advanceAmount != null && (
+                  <span className="inline-flex items-center gap-1 bg-green-50 border border-green-300 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                    <CheckCircle className="w-3 h-3" /> Advance Paid: ₹{booking.advanceAmount}
+                  </span>
+                )}
+                {!booking.advancePaid && booking.status === 'approved' && (
+                  <span className="inline-flex items-center gap-1 bg-blue-50 border border-blue-300 text-blue-700 px-2 py-0.5 rounded-full">
+                    Advance Pending from customer
+                  </span>
+                )}
+                {booking.remainingAmount != null && booking.advancePaid && (
+                  <span className="text-gray-600">
+                    Remaining:{' '}
+                    <span className={booking.remainingPaymentStatus === 'paid_to_owner' ? 'text-green-600' : 'text-orange-600'}>
+                      ₹{booking.remainingAmount}{' '}
+                      {booking.remainingPaymentStatus === 'paid_to_owner' ? '✓ Paid to Owner' : '(Pending)'}
+                    </span>
+                  </span>
+                )}
                 {booking.pickupPhotoS3Key && (
                   <span className="text-gray-600">
                     Photo: <span className="text-blue-600">Stored (auto-delete on completion)</span>

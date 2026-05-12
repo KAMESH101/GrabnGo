@@ -32,11 +32,11 @@ export const CustomerLocationDisplayLeaflet: React.FC<CustomerLocationDisplayLea
   // Calculate distance if product location available
   const distance = productLat && productLng
     ? calculateCustomerToProductDistance(
-        customerLocation.lat,
-        customerLocation.lng,
-        productLat,
-        productLng
-      )
+      customerLocation.lat,
+      customerLocation.lng,
+      productLat,
+      productLng
+    )
     : null;
 
   // Create custom icons for customer and product
@@ -67,7 +67,8 @@ export const CustomerLocationDisplayLeaflet: React.FC<CustomerLocationDisplayLea
     : [customerLocation.lat, customerLocation.lng];
 
   const handleGetDirections = () => {
-    const url = `https://www.google.com/maps/dir/?api=1&origin=${customerLocation.lat},${customerLocation.lng}&destination=${productLat},${productLng}`;
+    // ✅ Opens OpenStreetMap directions — no Google Maps, no API key
+    const url = `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${customerLocation.lat}%2C${customerLocation.lng}%3B${productLat}%2C${productLng}`;
     window.open(url, '_blank');
   };
 
@@ -128,9 +129,9 @@ export const CustomerLocationDisplayLeaflet: React.FC<CustomerLocationDisplayLea
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            
+
             {/* Customer Location Marker */}
-            <Marker 
+            <Marker
               position={[customerLocation.lat, customerLocation.lng]}
               icon={customerIcon}
             >
@@ -148,7 +149,7 @@ export const CustomerLocationDisplayLeaflet: React.FC<CustomerLocationDisplayLea
             {/* Product Location Marker (if available) */}
             {productLat && productLng && (
               <>
-                <Marker 
+                <Marker
                   position={[productLat, productLng]}
                   icon={productIcon}
                 >

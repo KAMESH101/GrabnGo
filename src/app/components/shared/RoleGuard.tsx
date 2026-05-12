@@ -14,10 +14,10 @@ interface RoleGuardProps {
   redirectTo?: string;
 }
 
-export const RoleGuard: React.FC<RoleGuardProps> = ({ 
-  children, 
-  allowedRoles, 
-  redirectTo 
+export const RoleGuard: React.FC<RoleGuardProps> = ({
+  children,
+  allowedRoles,
+  redirectTo
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -30,24 +30,24 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
       return;
     }
 
-    // If user role is not allowed
-    if (!allowedRoles.includes(user.role)) {
-      console.warn('⚠️ [ROLE GUARD] User role not allowed:', user.role, 'Allowed:', allowedRoles);
-      
-      // Redirect to appropriate home based on user role
+    // If user active role is not allowed
+    if (!allowedRoles.includes(user.activeRole)) {
+      console.warn('⚠️ [ROLE GUARD] User active role not allowed:', user.activeRole, 'Allowed:', allowedRoles);
+
+      // Redirect to appropriate home based on user active role
       const roleRedirects: Record<UserRole, string> = {
         customer: '/customer/home',
         owner: '/owner/dashboard',
         admin: '/admin/dashboard',
       };
 
-      const fallback = redirectTo || roleRedirects[user.role] || '/';
+      const fallback = redirectTo || roleRedirects[user.activeRole] || '/';
       navigate(fallback);
     }
   }, [user, allowedRoles, navigate, redirectTo]);
 
-  // Only render if user exists and has allowed role
-  if (!user || !allowedRoles.includes(user.role)) {
+  // Only render if user exists and has allowed active role
+  if (!user || !allowedRoles.includes(user.activeRole)) {
     return null;
   }
 

@@ -11,7 +11,17 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
+    host: '127.0.0.1',
+    port: 5173,
     allowedHosts: true,
+    proxy: {
+      // Route all /api calls to the Express server (KYC + Payments)
+      '/api': {
+        target: 'http://127.0.0.1:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   resolve: {
     alias: {
@@ -20,3 +30,4 @@ export default defineConfig({
     },
   },
 })
+

@@ -3,13 +3,16 @@ import { AuditLog } from '../types';
 // Demo AWS S3 configuration
 const S3_BUCKET_NAME = 'grabngo-customer-photos-demo';
 const S3_PRODUCT_IMAGES_BUCKET = 'grabngo-product-images-demo';
+const S3_KYC_BUCKET = 'grabngo-kyc-documents-demo';
 const S3_REGION = 'ap-south-1'; // Mumbai region for India
 const S3_BASE_URL = `https://${S3_BUCKET_NAME}.s3.${S3_REGION}.amazonaws.com`;
 const S3_PRODUCT_BASE_URL = `https://${S3_PRODUCT_IMAGES_BUCKET}.s3.${S3_REGION}.amazonaws.com`;
+const S3_KYC_BASE_URL = `https://${S3_KYC_BUCKET}.s3.${S3_REGION}.amazonaws.com`;
 
 // In-memory storage for demo (simulates S3)
 const demoStorage = new Map<string, { url: string; bookingId: string; uploadedAt: Date }>();
 const demoProductStorage = new Map<string, { url: string; listingId: string; uploadedAt: Date }>();
+const demoKycStorage = new Map<string, { url: string; userId: string; uploadedAt: Date }>();
 
 /**
  * Upload product image to S3 (Demo mode)
@@ -134,7 +137,7 @@ export const getCustomerPhotoFromS3 = async (s3Key: string): Promise<string | nu
   await new Promise(resolve => setTimeout(resolve, 500));
 
   const photoData = demoStorage.get(s3Key);
-  
+
   if (!photoData) {
     console.log('[DEMO MODE] Photo not found in S3:', { key: s3Key });
     return null;
@@ -160,7 +163,7 @@ export const deleteCustomerPhotoFromS3 = async (
   await new Promise(resolve => setTimeout(resolve, 800));
 
   const photoData = demoStorage.get(s3Key);
-  
+
   if (photoData) {
     demoStorage.delete(s3Key);
   }
@@ -205,7 +208,7 @@ export const getPresignedPhotoUrl = async (
   await new Promise(resolve => setTimeout(resolve, 400));
 
   const photoData = demoStorage.get(s3Key);
-  
+
   if (!photoData) {
     return null;
   }
@@ -252,7 +255,7 @@ export const listBookingPhotos = async (bookingId: string): Promise<string[]> =>
   await new Promise(resolve => setTimeout(resolve, 500));
 
   const photos: string[] = [];
-  
+
   for (const [key, data] of demoStorage.entries()) {
     if (data.bookingId === bookingId) {
       photos.push(key);

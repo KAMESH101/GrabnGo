@@ -31,15 +31,15 @@ const customIcon = new L.Icon({
 });
 
 interface LocationPickerProps {
-  onLocationConfirmed: (lat: number, lng: number, locality: string) => void;
+  onLocationConfirmed: (lat: number, lng: number, locality: string, formattedAddress?: string) => void;
   initialLat?: number;
   initialLng?: number;
   address?: string;
 }
 
 // Component to handle map clicks and recenter
-function LocationMarker({ position, setPosition }: { 
-  position: [number, number] | null; 
+function LocationMarker({ position, setPosition }: {
+  position: [number, number] | null;
   setPosition: (pos: [number, number]) => void;
 }) {
   useMapEvents({
@@ -50,8 +50,8 @@ function LocationMarker({ position, setPosition }: {
   });
 
   return position === null ? null : (
-    <Marker 
-      position={position} 
+    <Marker
+      position={position}
       icon={customIcon}
       draggable={true}
       eventHandlers={{
@@ -68,7 +68,7 @@ function LocationMarker({ position, setPosition }: {
 // Component to handle flying to location
 function FlyToLocation({ position }: { position: [number, number] }) {
   const map = useMap();
-  
+
   useEffect(() => {
     if (position) {
       map.flyTo(position, 15, { duration: 1 });
@@ -86,7 +86,7 @@ export const LeafletLocationPicker: React.FC<LocationPickerProps> = ({
 }) => {
   // Chennai center as default
   const defaultCenter: [number, number] = [13.0827, 80.2707];
-  
+
   const [position, setPosition] = useState<[number, number] | null>(
     initialLat && initialLng ? [initialLat, initialLng] : null
   );
@@ -94,6 +94,7 @@ export const LeafletLocationPicker: React.FC<LocationPickerProps> = ({
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [captureMethod, setCaptureMethod] = useState<'gps' | 'manual' | null>(null);
   const [resolvedLocality, setResolvedLocality] = useState<string | null>(null);
+  const [resolvedAddress, setResolvedAddress] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<'high' | 'medium' | 'low' | null>(null);
   const [isResolvingAddress, setIsResolvingAddress] = useState(false);
   const [resolutionError, setResolutionError] = useState<string | null>(null);
@@ -105,7 +106,7 @@ export const LeafletLocationPicker: React.FC<LocationPickerProps> = ({
 
       setIsResolvingAddress(true);
       setResolutionError(null);
-      
+
       console.log('🎯 [OWNER LISTING] Marker position changed:', {
         lat: position[0],
         lng: position[1],
@@ -126,7 +127,7 @@ export const LeafletLocationPicker: React.FC<LocationPickerProps> = ({
       try {
         // Step 2: Perform reverse geocoding (STRICT - NO FALLBACK)
         const result = await getLocalityFromCoords(position[0], position[1]);
-        
+
         if (!result) {
           console.error('❌ [RESOLUTION FAILED] Unable to resolve locality for coordinates');
           setResolutionError('Unable to determine locality. Please try a different location or check your internet connection.');
@@ -138,11 +139,15 @@ export const LeafletLocationPicker: React.FC<LocationPickerProps> = ({
 
         // Step 3: Store resolved data
         setResolvedLocality(result.locality);
+        setResolvedAddress(result.formattedAddress || null);
         setConfidence(result.confidence);
         setResolutionError(null);
-        
+
         console.log('✅ [FINAL RESOLUTION] Locality confirmed:', {
           locality: result.locality,
+          formattedAddress: result.formattedAddress,
+          streetAddress: result.streetAddress,
+          buildingNumber: result.buildingNumber,
           confidence: result.confidence,
           coordinates: { lat: position[0], lng: position[1] },
           fullAddress: result.rawData.display_name
@@ -179,7 +184,7 @@ export const LeafletLocationPicker: React.FC<LocationPickerProps> = ({
         },
         (error) => {
           let errorMessage = 'Unable to get your location. ';
-          
+
           if (error.code === error.PERMISSION_DENIED) {
             errorMessage += 'Please grant location permission in your browser settings.';
           } else if (error.code === error.POSITION_UNAVAILABLE) {
@@ -189,15 +194,15 @@ export const LeafletLocationPicker: React.FC<LocationPickerProps> = ({
           } else {
             errorMessage += 'Please select manually on the map.';
           }
-          
+
           toast.error(errorMessage);
           setIsCapturing(false);
           setCaptureMethod(null);
         },
         {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
+          enableHighAccuracy: true, // Use GPS for precise location
+          timeout: 15000, // 15 second timeout (GPS needs time for accurate lock)
+          maximumAge: 0, // Always get fresh position, no cached data
         }
       );
     } else {
@@ -210,7 +215,7 @@ export const LeafletLocationPicker: React.FC<LocationPickerProps> = ({
   const handleConfirmLocation = () => {
     if (position && resolvedLocality) {
       setIsConfirmed(true);
-      onLocationConfirmed(position[0], position[1], resolvedLocality);
+      onLocationConfirmed(position[0], position[1], resolvedLocality, resolvedAddress || undefined);
       toast.success('✓ Pickup location confirmed');
     }
   };
@@ -220,6 +225,7 @@ export const LeafletLocationPicker: React.FC<LocationPickerProps> = ({
     setPosition(null);
     setCaptureMethod(null);
     setResolvedLocality(null);
+    setResolvedAddress(null);
     setConfidence(null);
     setResolutionError(null);
   };
@@ -230,7 +236,7 @@ export const LeafletLocationPicker: React.FC<LocationPickerProps> = ({
       <Alert className="bg-blue-50 border-blue-200">
         <MapPin className="h-4 w-4 text-blue-600" />
         <AlertDescription className="text-blue-800 text-sm">
-          <strong>Location Selection:</strong> Click the "Use Current GPS Location" button or click/drag the marker on the map to set your location. 
+          <strong>Location Selection:</strong> Click the "Use Current GPS Location" button or click/drag the marker on the map to set your location.
           Confirm when ready.
         </AlertDescription>
       </Alert>
@@ -315,11 +321,10 @@ export const LeafletLocationPicker: React.FC<LocationPickerProps> = ({
                         <strong>{resolvedLocality}</strong>, Chennai, Tamil Nadu
                       </p>
                       <div className="flex items-center gap-2 mb-2">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          confidence === 'high' ? 'bg-green-100 text-green-800' :
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${confidence === 'high' ? 'bg-green-100 text-green-800' :
                           confidence === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-orange-100 text-orange-800'
-                        }`}>
+                            'bg-orange-100 text-orange-800'
+                          }`}>
                           {confidence?.toUpperCase()} CONFIDENCE
                         </span>
                       </div>
@@ -350,7 +355,7 @@ export const LeafletLocationPicker: React.FC<LocationPickerProps> = ({
             <Alert className="bg-amber-50 border-amber-200">
               <AlertCircle className="h-4 w-4 text-amber-600" />
               <AlertDescription className="text-amber-800">
-                <strong>Review Required:</strong> Please verify the location shown on the map matches your actual pickup location. 
+                <strong>Review Required:</strong> Please verify the location shown on the map matches your actual pickup location.
                 You must confirm before proceeding.
               </AlertDescription>
             </Alert>

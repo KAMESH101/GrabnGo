@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router';
 import { Button } from '../ui/button';
 import { useAuth } from '../../context/AuthContext';
 import { CustomerLeafletLocationModal } from '../customer/CustomerLeafletLocationModal';
+import { RoleSwitcher } from './RoleSwitcher';
 import { VerifiedCustomerLocation } from '../../types';
 import { Search, User, LogOut, Menu, MapPin } from 'lucide-react';
 import {
@@ -33,16 +34,16 @@ export const Navbar: React.FC = () => {
     <nav className="border-b bg-white sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to={user ? `/${user.role}/home` : '/'} className="flex items-center gap-2">
-            <img 
-              src={logo} 
-              alt="GrabNGo" 
+          <Link to={user ? `/${user.activeRole}/home` : '/'} className="flex items-center gap-2">
+            <img
+              src={logo}
+              alt="GrabNGo"
               className="h-10 w-auto object-contain"
             />
             <span className="text-xl font-bold text-indigo-600">GrabNGo</span>
           </Link>
 
-          {user && user.role === 'customer' && (
+          {user && user.activeRole === 'customer' && (
             <div className="flex-1 max-w-md mx-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -57,8 +58,11 @@ export const Navbar: React.FC = () => {
           )}
 
           <div className="flex items-center gap-2">
+            {/* Role Switcher for multi-role users */}
+            <RoleSwitcher />
+
             {/* Customer Location Display (Optional - User Controlled) */}
-            {user && user.role === 'customer' && user.verifiedLocation && (
+            {user && user.activeRole === 'customer' && user.verifiedLocation && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -79,12 +83,16 @@ export const Navbar: React.FC = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate(`/${user.role}/dashboard`)}>
+                  <DropdownMenuItem onClick={() => navigate(`/${user.activeRole}/profile`)}>
+                    <User className="w-4 h-4 mr-2" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate(`/${user.activeRole}/dashboard`)}>
                     Dashboard
                   </DropdownMenuItem>
-                  
+
                   {/* Change Location Option - Customer Only */}
-                  {user.role === 'customer' && (
+                  {user.activeRole === 'customer' && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => setIsLocationModalOpen(true)}>
@@ -93,7 +101,7 @@ export const Navbar: React.FC = () => {
                       </DropdownMenuItem>
                     </>
                   )}
-                  
+
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="w-4 h-4 mr-2" />
@@ -116,7 +124,7 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Location Modal - User Controlled (Optional) */}
-      {user && user.role === 'customer' && (
+      {user && user.activeRole === 'customer' && (
         <CustomerLeafletLocationModal
           isOpen={isLocationModalOpen}
           onClose={() => setIsLocationModalOpen(false)}

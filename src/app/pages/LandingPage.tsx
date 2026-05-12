@@ -85,7 +85,7 @@ export const LandingPage: React.FC = () => {
         <h2 className="text-3xl text-center mb-8">Browse Categories</h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {categories.map(({ name, icon: Icon, color }) => (
-            <Card key={name} className="cursor-pointer hover:shadow-lg transition-shadow">
+            <Card key={name} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/customer/login')}>
               <CardContent className="p-6 text-center">
                 <div className={`${color} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3`}>
                   <Icon className="w-8 h-8 text-white" />

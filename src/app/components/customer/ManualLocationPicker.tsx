@@ -35,7 +35,7 @@ export const ManualLocationPicker: React.FC<ManualLocationPickerProps> = ({
 
     // Find the locality data
     const localityData = chennaiLocalities.find(l => l.name === selectedLocality);
-    
+
     if (localityData) {
       const verifiedLocation: VerifiedCustomerLocation = {
         lat: localityData.lat,
@@ -79,12 +79,11 @@ export const ManualLocationPicker: React.FC<ManualLocationPickerProps> = ({
 
         {/* Content */}
         <div className="p-6 space-y-4">
-          {/* Google Maps Setup Notice */}
-          <Alert className="bg-amber-50 border-amber-200">
-            <AlertCircle className="h-4 w-4 text-amber-600" />
-            <AlertDescription className="text-amber-900 text-sm">
-              <strong>Google Maps not configured.</strong> Using manual location selection.
-              See <code className="bg-amber-100 px-1 rounded text-xs">GOOGLE_MAPS_FIX.md</code> to enable maps.
+          {/* Location info notice */}
+          <Alert className="bg-blue-50 border-blue-200">
+            <AlertCircle className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-900 text-sm">
+              Select your Chennai locality. Maps are powered by <strong>Leaflet + OpenStreetMap</strong> — no Google Maps used.
             </AlertDescription>
           </Alert>
 

@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite"
+    "dev": "vite",
+    "server": "node server/index.js",
+    "dev:all": "concurrently \"npm run dev\" \"npm run server\""
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -41,12 +43,14 @@
     "@radix-ui/react-tooltip": "1.1.8",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^25.0.10",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
     "date-fns": "3.6.0",
     "embla-carousel-react": "8.6.0",
-    "input-otp": "1.4.2",
+    "face-api.js": "^0.22.2",
+
     "jspdf": "^4.0.0",
     "jspdf-autotable": "^5.0.7",
     "leaflet": "^1.9.4",
@@ -72,6 +76,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "4.1.12",
     "@vitejs/plugin-react": "4.7.0",
+    "concurrently": "^9.2.1",
     "tailwindcss": "4.1.12",
     "vite": "6.3.5"
   },

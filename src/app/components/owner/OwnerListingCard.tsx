@@ -25,11 +25,13 @@ export const OwnerListingCard: React.FC<OwnerListingCardProps> = ({
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative">
-        <img
-          src={listing.images[0]}
-          alt={listing.title}
-          className="w-full h-48 object-cover"
-        />
+        <div className="w-full h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <img
+            src={listing.images[0]}
+            alt={listing.title}
+            className="w-full h-full object-contain"
+          />
+        </div>
         <div className="absolute top-3 right-3">
           <Badge variant={listing.availability ? 'default' : 'secondary'}>
             {listing.availability ? 'Active' : 'Inactive'}

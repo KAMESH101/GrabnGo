@@ -91,14 +91,45 @@ export const getNearbyProducts = async (
 
 /**
  * Create a new product listing
+ * 🔒 SECURITY: Enforces owner role + verified owner KYC
  */
-export const createProduct = async (productData: Omit<Product, 'id'>): Promise<Product> => {
+export const createProduct = async (
+  productData: Omit<Product, 'id' | 'ownerId'>,
+  userId: string
+): Promise<Product> => {
+  console.log('📝 [PRODUCTS SERVICE] Creating product for user:', userId);
+
+  // 🔒 BACKEND PERMISSION CHECK - CRITICAL SECURITY ENFORCEMENT
+  const { getUserById } = await import('./database');
+  const { canAddListing } = await import('./roleService');
+
+  const owner = getUserById(userId);
+
+  if (!owner) {
+    console.error('❌ [PRODUCTS SERVICE] User not found:', userId);
+    throw new Error('Unauthorized: User not found');
+  }
+
+  // Validate user has owner role and verified owner KYC
+  if (!canAddListing(owner)) {
+    console.error('❌ [PRODUCTS SERVICE] Permission denied for user:', userId, {
+      activeRole: owner.activeRole,
+      ownerKycStatus: owner.ownerKycStatus,
+    });
+    throw new Error(
+      'Permission denied: Owner KYC must be verified to create listings. ' +
+      'Please complete Owner KYC verification first.'
+    );
+  }
+
+  // ✅ Permission validated - proceed with creation
   const product: Product = {
     ...productData,
     id: `product_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+    ownerId: userId, // ✅ Set from authenticated user, not client input
   };
 
-  console.log('📝 [PRODUCTS SERVICE] Creating product:', {
+  console.log('✅ [PRODUCTS SERVICE] Permission validated. Creating product:', {
     id: product.id,
     title: product.title,
     ownerId: product.ownerId,
@@ -132,7 +163,7 @@ export const deleteProduct = async (productId: string): Promise<void> => {
  */
 export const toggleProductAvailability = async (productId: string): Promise<Product> => {
   const product = await dbGetProductById(productId);
-  
+
   if (!product) {
     throw new Error('Product not found');
   }

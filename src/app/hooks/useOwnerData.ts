@@ -35,7 +35,7 @@ export const useOwnerData = (ownerId: string) => {
 
     try {
       console.log('🔄 [OWNER DATA] Fetching data for owner:', ownerId);
-      
+
       // Fetch in parallel
       const [listings, bookings] = await Promise.all([
         getProductsByOwnerId(ownerId),
@@ -63,21 +63,34 @@ export const useOwnerData = (ownerId: string) => {
     fetchOwnerData();
   }, [fetchOwnerData]);
 
+  // Auto-refresh every 15 seconds so the owner sees booking status changes
+  // (e.g. after customer pays advance → 'confirmed' → "Start Rental & Verify" appears)
+  useEffect(() => {
+    if (!ownerId) return;
+    const interval = setInterval(() => {
+      fetchOwnerData();
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [ownerId, fetchOwnerData]);
+
   // CREATE listing
-  const createListing = async (newListing: Omit<Product, 'id'>) => {
+  const createListing = async (newListing: Omit<Product, 'id' | 'ownerId'>) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      console.log('📝 [OWNER DATA] Creating listing');
-      const listing = await createProduct(newListing);
-      
+      console.log('📝 [OWNER DATA] Creating listing for owner:', ownerId);
+
+      // ✅ Pass ownerId for backend permission validation
+      const listing = await createProduct(newListing, ownerId);
+
       // Add to local state
       setOwnerListings(prev => [...prev, listing]);
-      
+
       return listing;
     } catch (err) {
-      setError('Failed to create listing');
+      console.error('❌ [OWNER DATA] Failed to create listing:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create listing');
       throw err;
     } finally {
       setIsLoading(false);
@@ -88,11 +101,11 @@ export const useOwnerData = (ownerId: string) => {
   const updateListing = async (id: string, updates: Partial<Product>) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       console.log('🔄 [OWNER DATA] Updating listing:', id);
       const updatedProduct = await dbUpdateProduct(id, updates);
-      
+
       // Update local state
       setOwnerListings(prev =>
         prev.map(listing =>
@@ -111,11 +124,11 @@ export const useOwnerData = (ownerId: string) => {
   const deleteListing = async (id: string) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       console.log('🗑️ [OWNER DATA] Deleting listing:', id);
       await dbDeleteProduct(id);
-      
+
       // Remove from local state
       setOwnerListings(prev => prev.filter(listing => listing.id !== id));
     } catch (err) {
@@ -130,7 +143,7 @@ export const useOwnerData = (ownerId: string) => {
   const toggleListingAvailability = async (id: string) => {
     try {
       const updatedProduct = await toggleProductAvailability(id);
-      
+
       // Update local state
       setOwnerListings(prev =>
         prev.map(listing =>

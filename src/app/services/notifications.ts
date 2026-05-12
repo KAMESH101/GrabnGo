@@ -263,3 +263,44 @@ GrabNGo Team
 
   return { sms, email };
 };
+/**
+ * Notify owner that customer has paid advance — ready for photo verification
+ */
+export const sendOwnerPaymentConfirmedNotification = async (
+  ownerPhone: string,
+  ownerEmail: string,
+  bookingId: string,
+  productTitle: string,
+  customerName: string,
+  advanceAmount: number,
+  pickupDate: string
+): Promise<{ sms: NotificationLog; email: NotificationLog }> => {
+  const smsMessage = `✅ Advance payment received for ${productTitle}! Customer ${customerName} has paid ₹${advanceAmount}. Booking ID: ${bookingId}. Pickup: ${pickupDate}. Go to Booking Management to start rental. - GrabNGo`;
+
+  const emailSubject = `Advance Payment Received — Ready for Pickup | ${bookingId}`;
+  const emailBody = `
+Dear Owner,
+
+Great news! The customer has successfully paid the advance for their booking.
+
+Booking Details:
+- Booking ID: ${bookingId}
+- Product: ${productTitle}
+- Customer: ${customerName}
+- Advance Paid: ₹${advanceAmount}
+- Pickup Date: ${pickupDate}
+
+Next Step:
+Go to your Booking Management dashboard and click "Start Rental & Verify" to perform the customer photo verification at pickup.
+
+Best regards,
+GrabNGo Team
+  `.trim();
+
+  const [sms, email] = await Promise.all([
+    sendSMS(ownerPhone, smsMessage, bookingId),
+    sendEmail(ownerEmail, emailSubject, emailBody, bookingId),
+  ]);
+
+  return { sms, email };
+};

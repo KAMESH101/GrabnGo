@@ -6,7 +6,7 @@ import { Button } from '../../components/ui/button';
 import { BackButton } from '../../components/ui/BackButton';
 import { Badge } from '../../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { MapPin, Calendar, IndianRupee, AlertCircle, Clock, Loader2, Shield, User, Phone } from 'lucide-react';
+import { MapPin, Calendar, IndianRupee, AlertCircle, Clock, Loader2, User, Phone } from 'lucide-react';
 import { getProductById } from '../../services/database';
 import { Product } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -28,12 +28,12 @@ export const ProductDetail: React.FC = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id) return;
-      
+
       setIsLoading(true);
       try {
         console.log('🔍 [PRODUCT DETAIL] Fetching product:', id);
         const fetchedProduct = await getProductById(id);
-        
+
         if (fetchedProduct) {
           setProduct(fetchedProduct);
           console.log('✅ [PRODUCT DETAIL] Product loaded:', fetchedProduct.title);
@@ -88,17 +88,19 @@ export const ProductDetail: React.FC = () => {
 
       <div className="container mx-auto px-4 py-8">
         <BackButton />
-        
+
         <div className="grid md:grid-cols-2 gap-8">
           {/* Image Gallery */}
           <div>
             <Card>
               <CardContent className="p-0">
-                <img
-                  src={product.images[selectedImage]}
-                  alt={product.title}
-                  className="w-full h-96 object-cover rounded-t-lg"
-                />
+                <div className="w-full h-96 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-lg">
+                  <img
+                    src={product.images[selectedImage]}
+                    alt={product.title}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -107,7 +109,7 @@ export const ProductDetail: React.FC = () => {
           <div>
             <div className="text-sm text-indigo-600 mb-2">{product.category}</div>
             <h1 className="text-3xl mb-4">{product.title}</h1>
-            
+
             <div className="flex items-center gap-4 mb-6">
               <div>
                 <span className="text-4xl text-indigo-600">₹{product.pricePerDay}</span>
@@ -121,14 +123,8 @@ export const ProductDetail: React.FC = () => {
               )}
             </div>
 
+
             <div className="space-y-4 mb-6">
-              <div className="flex items-center gap-3">
-                <Shield className="w-5 h-5 text-gray-600" />
-                <div>
-                  <span className="block">Deposit Required</span>
-                  <span className="text-indigo-600">₹{product.deposit}</span>
-                </div>
-              </div>
               <div className="flex items-center gap-3">
                 <MapPin className="w-5 h-5 text-gray-600" />
                 <div>
@@ -147,7 +143,7 @@ export const ProductDetail: React.FC = () => {
                 <Phone className="w-5 h-5 text-gray-600" />
                 <div>
                   <span className="block">Contact Number</span>
-                  <a 
+                  <a
                     href={`tel:${product.ownerPhone}`}
                     className="text-indigo-600 hover:text-indigo-700 font-medium"
                   >
@@ -229,10 +225,8 @@ export const ProductDetail: React.FC = () => {
                 <CardContent className="p-6">
                   <ul className="list-disc list-inside space-y-2 text-gray-700">
                     <li>Valid ID proof required at pickup</li>
-                    <li>Security deposit refundable after return inspection</li>
                     <li>Late return charges: ₹{Math.floor(product.pricePerDay * 0.2)}/hour</li>
                     <li>Fuel/battery charges as per usage</li>
-                    <li>Damages will be charged from deposit</li>
                     <li>Cancellation allowed up to 24 hours before start</li>
                   </ul>
                 </CardContent>
@@ -241,6 +235,6 @@ export const ProductDetail: React.FC = () => {
           </Tabs>
         </div>
       </div>
-    </div>
+    </div >
   );
 };

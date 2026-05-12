@@ -21,14 +21,14 @@ export const CreateListing: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { createListing, isLoading } = useOwnerData(user?.id || '');
-  
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     category: '' as Category | '',
     pricePerDay: '',
     pricePerHour: '',
-    deposit: '',
+    deposit: '0', // Default to 0 (no deposit required)
     locality: '',
     address: '',
     instructions: '',
@@ -85,23 +85,29 @@ export const CreateListing: React.FC = () => {
   };
 
   // Handle location confirmation from LeafletLocationPicker
-  const handleLocationConfirmed = (lat: number, lng: number, locality: string) => {
+  const handleLocationConfirmed = (lat: number, lng: number, locality: string, formattedAddress?: string) => {
     console.log('📍 [CREATE LISTING] Location confirmed from map:', {
       lat,
       lng,
       locality,
+      formattedAddress,
       timestamp: new Date().toISOString()
     });
-    
+
     setCoordinates({ lat, lng });
     // STRICT RULE: Use the resolved locality from reverse geocoding, NOT the dropdown
-    setFormData({ ...formData, locality });
+    setFormData({
+      ...formData,
+      locality,
+      // Auto-fill address if we got a formatted address from GPS
+      address: formattedAddress || formData.address
+    });
     setIsLocationConfirmed(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
       toast.error('You must be logged in to create a listing');
       return;
@@ -134,7 +140,7 @@ export const CreateListing: React.FC = () => {
       // Upload images to S3 (demo mode)
       toast.loading('Uploading product images...');
       const uploadedImageUrls = await uploadProductImagesToS3(images, tempListingId);
-      
+
       // Use confirmed coordinates (already validated above)
       const finalCoords = coordinates;
 
@@ -147,9 +153,8 @@ export const CreateListing: React.FC = () => {
         category: formData.category as Category,
         pricePerDay: Number(formData.pricePerDay),
         pricePerHour: formData.pricePerHour ? Number(formData.pricePerHour) : undefined,
-        deposit: Number(formData.deposit),
+        deposit: formData.deposit ? Number(formData.deposit) : 0, // Default to 0 if not specified
         images: uploadedImageUrls, // Use uploaded images
-        ownerId: user.id,
         ownerName: user.name,
         ownerPhone: user.phone, // Added for customer-owner contact
         pickupLocality: formData.locality,
@@ -163,7 +168,7 @@ export const CreateListing: React.FC = () => {
       toast.dismiss();
       toast.success('✅ Listing created successfully!');
       toast.success('📍 Your listing is now visible to customers');
-      
+
       // Navigate to manage listings after a short delay
       setTimeout(() => navigate('/owner/manage-listings'), 1500);
     } catch (error) {
@@ -193,8 +198,8 @@ export const CreateListing: React.FC = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <Label htmlFor="category">Category *</Label>
-                    <Select 
-                      value={formData.category} 
+                    <Select
+                      value={formData.category}
                       onValueChange={(value) => setFormData({ ...formData, category: value as Category })}
                       required
                     >
@@ -261,10 +266,10 @@ export const CreateListing: React.FC = () => {
                       <Input
                         id="deposit"
                         type="number"
-                        placeholder="5000"
                         value={formData.deposit}
                         onChange={(e) => setFormData({ ...formData, deposit: e.target.value })}
-                        required
+                        required={false}
+                        placeholder="0 (optional)"
                       />
                     </div>
                   </div>
@@ -275,7 +280,7 @@ export const CreateListing: React.FC = () => {
                       <ImageIcon className="w-4 h-4" />
                       Product Images * (Upload actual product photos)
                     </Label>
-                    
+
                     {/* Image Previews */}
                     {images.length > 0 && (
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
@@ -408,8 +413,8 @@ export const CreateListing: React.FC = () => {
                   </div>
 
                   <div className="flex gap-4 pt-4">
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       className="bg-green-600 hover:bg-green-700"
                       disabled={isLoading || images.length === 0 || !isLocationConfirmed}
                     >

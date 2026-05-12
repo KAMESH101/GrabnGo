@@ -155,6 +155,7 @@ export const Reports: React.FC = () => {
         'Deposit',
         'Total Amount',
         'Payment Status',
+        'Final Payment Method',
         'Booking Status',
         'Date Booked',
       ];
@@ -163,6 +164,11 @@ export const Reports: React.FC = () => {
         const duration = Math.ceil(
           (new Date(booking.endDate).getTime() - new Date(booking.startDate).getTime()) / (1000 * 60 * 60 * 24)
         );
+
+        const finalPaymentMethod =
+          booking.remainingPaymentStatus === 'paid_online' ? 'Online (Razorpay)'
+          : (booking.remainingPaymentStatus === 'paid_cash' || booking.remainingPaymentStatus === 'paid_to_owner') ? 'Cash to Owner'
+          : 'N/A';
         
         return [
           booking.id.toUpperCase(),
@@ -177,6 +183,7 @@ export const Reports: React.FC = () => {
           booking.deposit,
           booking.totalAmount,
           booking.paymentStatus || 'N/A',
+          finalPaymentMethod,
           booking.status,
           format(new Date(booking.startDate), 'dd MMM yyyy HH:mm'),
         ];
@@ -469,9 +476,18 @@ export const Reports: React.FC = () => {
                         <TableCell>₹{booking.deposit}</TableCell>
                         <TableCell className="font-medium">₹{booking.totalAmount}</TableCell>
                         <TableCell>
-                          <Badge variant={booking.paymentStatus === 'success' ? 'default' : 'secondary'}>
-                            {booking.paymentStatus || 'N/A'}
-                          </Badge>
+                          <div className="space-y-1">
+                            <Badge variant={booking.paymentStatus === 'success' ? 'default' : 'secondary'}>
+                              {booking.paymentStatus === 'success' ? '✔ SUCCESS' : (booking.paymentStatus || 'PENDING')}
+                            </Badge>
+                            {booking.remainingPaymentStatus && booking.remainingPaymentStatus !== 'pending' && (
+                              <p className="text-xs text-gray-500">
+                                {booking.remainingPaymentStatus === 'paid_online'
+                                  ? 'Final: Online'
+                                  : 'Final: Cash'}
+                              </p>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>
                           <Badge

@@ -7,6 +7,7 @@ import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Alert, AlertDescription } from '../../components/ui/alert';
+import { BecomeOwnerButton } from '../../components/customer/BecomeOwnerButton';
 import { Category, Product, VerifiedCustomerLocation } from '../../types';
 import { getAvailableProducts, getNearbyProducts } from '../../services/products';
 import { Car, Bike, Camera, Plane, Package, MapPin, Navigation, Loader2 } from 'lucide-react';
@@ -72,8 +73,8 @@ export const CustomerHome: React.FC = () => {
   ];
 
   // Filter products by category
-  const filteredProducts = selectedCategory === 'All' 
-    ? products 
+  const filteredProducts = selectedCategory === 'All'
+    ? products
     : products.filter(p => p.category === selectedCategory);
 
   const featuredProducts = filteredProducts.slice(0, 4);
@@ -81,13 +82,13 @@ export const CustomerHome: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       {/* Hero Banner */}
       <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
         <div className="container mx-auto px-4 py-12">
           <h1 className="text-3xl md:text-4xl mb-4">Find Your Perfect Rental</h1>
           <p className="text-blue-100 mb-6">Browse thousands of items available near you</p>
-          
+
           {/* Current Location Display (if set) */}
           {user?.verifiedLocation && (
             <div className="bg-white rounded-lg p-4 max-w-md shadow-lg">
@@ -155,6 +156,13 @@ export const CustomerHome: React.FC = () => {
           </div>
         </section>
 
+        {/* Become Owner CTA - Only show for customer-only users */}
+        {user && !user.roles?.includes('owner') && (
+          <section className="mb-12">
+            <BecomeOwnerButton />
+          </section>
+        )}
+
         {/* Featured Rentals */}
         <section>
           <div className="flex justify-between items-center mb-6">
@@ -175,11 +183,13 @@ export const CustomerHome: React.FC = () => {
                   className="cursor-pointer hover:shadow-lg transition-shadow overflow-hidden"
                   onClick={() => navigate(`/customer/product/${product.id}`)}
                 >
-                  <img
-                    src={product.images[0]}
-                    alt={product.title}
-                    className="w-full h-48 object-cover"
-                  />
+                  <div className="w-full h-48 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-lg">
+                    <img
+                      src={product.images[0]}
+                      alt={product.title}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                   <CardContent className="p-4">
                     <h3 className="mb-2 line-clamp-1">{product.title}</h3>
                     <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">

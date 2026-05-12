@@ -14,14 +14,18 @@ import { Separator } from '../../components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { format } from 'date-fns';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  MapPin, 
-  User, 
-  Phone, 
-  Mail, 
-  CreditCard, 
+import { updateBooking } from '../../services/database';
+import { deleteCustomerPhotoFromS3, createPhotoAuditLog } from '../../services/storage';
+import { sendRentalCompletionNotification } from '../../services/notifications';
+import { refundRazorpayPayment } from '../../services/razorpay';
+import {
+  ArrowLeft,
+  Calendar,
+  MapPin,
+  User,
+  Phone,
+  Mail,
+  CreditCard,
   Package,
   Camera,
   FileText,
@@ -31,7 +35,10 @@ import {
   Navigation,
   Loader2,
   IndianRupee,
-  ShieldCheck
+  ShieldCheck,
+  AlertTriangle,
+  Loader,
+  Banknote
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -45,6 +52,7 @@ export const BookingDetails: React.FC = () => {
   const [booking, setBooking] = useState<Booking | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [processingAction, setProcessingAction] = useState(false);
 
   // Get listing details for the booking
   const listing = booking ? ownerListings.find(l => l.id === booking.productId) : undefined;
@@ -64,7 +72,7 @@ export const BookingDetails: React.FC = () => {
       try {
         console.log('📖 [BOOKING DETAILS] Loading booking:', bookingId);
         const fetchedBooking = await getBookingById(bookingId);
-        
+
         if (!fetchedBooking) {
           setError('Booking not found');
           setBooking(null);
@@ -129,6 +137,102 @@ export const BookingDetails: React.FC = () => {
     );
   }
 
+  // Narrow type: booking is guaranteed non-null from here on
+  if (!booking) return null;
+
+  // ── Owner action: Confirm cash payment ──────────────────────────────────────
+  const handleConfirmCashPayment = async () => {
+    if (!booking) return;
+    const confirmed = window.confirm(
+      `Confirm that the customer has paid ₹${booking.remainingAmount ?? ''} in cash to you?\n\nThis will unlock the "Complete & Delete Photo" button.`
+    );
+    if (!confirmed) return;
+    setProcessingAction(true);
+    try {
+      await updateBooking(booking.id, {
+        remainingPaymentStatus: 'paid_cash',
+        paymentStatus: 'success', // mark overall payment as success for Payment Status card & reports
+      });
+      createPhotoAuditLog(
+        booking.id,
+        'payment_success',
+        user?.id || 'owner',
+        `Cash payment of ₹${booking.remainingAmount} confirmed received by owner (from detail page).`
+      );
+      toast.success(`✅ Cash payment of ₹${booking.remainingAmount} confirmed!`);
+      toast.info('You can now complete the rental and delete the photo.');
+      // Reload booking
+      const updated = await getBookingById(booking.id);
+      if (updated) setBooking(updated);
+    } catch (err) {
+      console.error('Failed to confirm cash payment:', err);
+      toast.error('Failed to update payment status. Please try again.');
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  // ── Owner action: Complete rental & delete photo ─────────────────────────────
+  const handleCompleteRental = async () => {
+    if (!booking) return;
+    const isPaid =
+      booking.remainingPaymentStatus === 'paid_online' ||
+      booking.remainingPaymentStatus === 'paid_cash' ||
+      booking.remainingPaymentStatus === 'paid_to_owner';
+    if (booking.advancePaid && !isPaid) {
+      toast.error('Please confirm the remaining payment before completing the rental.');
+      return;
+    }
+    setProcessingAction(true);
+    try {
+      // Delete customer photo from S3
+      if (booking.pickupPhotoS3Key) {
+        toast.info('🗑️ Deleting customer photo from secure storage...');
+        const auditLog = await deleteCustomerPhotoFromS3(booking.pickupPhotoS3Key, booking.id);
+        toast.success('✅ Customer photo deleted (privacy compliance)');
+        console.log('Audit log created:', auditLog);
+      }
+      // Mark booking as completed
+      await updateBooking(booking.id, {
+        status: 'completed',
+        completedAt: new Date(),
+        returnTime: new Date(),
+        pickupPhotoUrl: undefined,
+        pickupPhotoS3Key: undefined,
+      });
+      // Refund deposit (no-op in test mode)
+      await refundRazorpayPayment(
+        booking.paymentId || 'demo_payment',
+        booking.deposit ?? 0,
+        'Security deposit refund on rental completion'
+      );
+      // Notify customer
+      await sendRentalCompletionNotification(
+        booking.customerPhone,
+        booking.customerEmail || 'customer@example.com',
+        booking.id,
+        booking.productTitle,
+        booking.deposit ?? 0
+      );
+      createPhotoAuditLog(
+        booking.id,
+        'rental_completed',
+        user?.id || 'owner',
+        `Rental completed from detail page. Photo deleted, deposit refund initiated.`
+      );
+      toast.success('🎉 Rental completed successfully!');
+      toast.success('📧 Completion notification sent to customer');
+      // Reload
+      const updated = await getBookingById(booking.id);
+      if (updated) setBooking(updated);
+    } catch (err) {
+      console.error('Failed to complete rental:', err);
+      toast.error('Failed to complete rental. Please try again.');
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -171,11 +275,13 @@ export const BookingDetails: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex gap-4">
-                  <img
-                    src={booking.productImage}
-                    alt={booking.productTitle}
-                    className="w-32 h-32 object-cover rounded-lg"
-                  />
+                  <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <img
+                      src={booking.productImage}
+                      alt={booking.productTitle}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                   <div className="flex-1">
                     <h3 className="text-xl mb-2">{booking.productTitle}</h3>
                     {listing && (
@@ -446,6 +552,42 @@ export const BookingDetails: React.FC = () => {
                   <span className="font-medium">Security Deposit</span>
                   <span className="text-lg font-medium text-blue-600">₹{booking.deposit}</span>
                 </div>
+
+                {/* Advance / Remaining Breakdown */}
+                {booking.advancePaid && (
+                  <>
+                    <Separator />
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-green-700 flex items-center gap-1">
+                        <CheckCircle className="w-4 h-4" /> Advance Paid
+                      </span>
+                      <span className="font-medium text-green-700">₹{booking.advanceAmount}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-orange-700">Remaining (from customer)</span>
+                      <span className="font-medium text-orange-700">₹{booking.remainingAmount}</span>
+                    </div>
+                    {booking.remainingPaymentStatus && (() => {
+                      const rps = booking.remainingPaymentStatus;
+                      const isPaid = rps === 'paid_online' || rps === 'paid_cash' || rps === 'paid_to_owner';
+                      const label = rps === 'paid_online'
+                        ? '✓ Received (Online)'
+                        : (rps === 'paid_cash' || rps === 'paid_to_owner')
+                        ? '✓ Received (Cash)'
+                        : 'Pending';
+                      return (
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-gray-600">Final Payment</span>
+                          <span className={`text-xs font-medium px-2 py-1 rounded ${
+                            isPaid ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
+                          }`}>
+                            {label}
+                          </span>
+                        </div>
+                      );
+                    })()}
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -458,25 +600,136 @@ export const BookingDetails: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Payment Status</p>
-                  <Badge 
+                {/* Advance Payment */}
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600">Advance Payment</span>
+                  {booking.advancePaid ? (
+                    <Badge variant="default" className="bg-green-600 text-white text-xs">✔ PAID</Badge>
+                  ) : (
+                    <Badge variant="secondary" className="text-xs">PENDING</Badge>
+                  )}
+                </div>
+
+                {/* Final / Remaining Payment */}
+                {booking.remainingPaymentStatus && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">Final Payment</span>
+                    {booking.remainingPaymentStatus === 'paid_online' ? (
+                      <Badge variant="default" className="bg-blue-600 text-white text-xs">✔ PAID ONLINE</Badge>
+                    ) : (booking.remainingPaymentStatus === 'paid_cash' || booking.remainingPaymentStatus === 'paid_to_owner') ? (
+                      <Badge variant="default" className="bg-green-600 text-white text-xs">✔ CASH RECEIVED</Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-xs">PENDING</Badge>
+                    )}
+                  </div>
+                )}
+
+                {/* Overall Status */}
+                <div className="flex justify-between items-center pt-2 border-t">
+                  <span className="text-sm font-medium text-gray-700">Overall Status</span>
+                  <Badge
                     variant={booking.paymentStatus === 'success' ? 'default' : 'secondary'}
-                    className="text-sm"
+                    className={`text-sm ${booking.paymentStatus === 'success' ? 'bg-green-600 text-white' : ''}`}
                   >
-                    {booking.paymentStatus?.toUpperCase() || 'PENDING'}
+                    {booking.paymentStatus === 'success' ? '✔ SUCCESS' : (booking.paymentStatus?.toUpperCase() || 'PENDING')}
                   </Badge>
                 </div>
-                {booking.paymentId && (
+
+                {booking.advanceTransactionId && (
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">Payment ID</p>
+                    <p className="text-xs text-gray-500 mb-1">Advance Txn ID</p>
                     <code className="text-xs bg-gray-100 px-2 py-1 rounded block break-all">
-                      {booking.paymentId}
+                      {booking.advanceTransactionId}
+                    </code>
+                  </div>
+                )}
+                {booking.remainingTransactionId && (
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Final Txn ID (Online)</p>
+                    <code className="text-xs bg-gray-100 px-2 py-1 rounded block break-all">
+                      {booking.remainingTransactionId}
                     </code>
                   </div>
                 )}
               </CardContent>
             </Card>
+
+            {/* Remaining Payment & Completion Actions (for active bookings) */}
+            {booking.status === 'active' && booking.pickupVerified && booking.advancePaid && (() => {
+              const rps = booking.remainingPaymentStatus;
+              const isPaidOnline = rps === 'paid_online';
+              const isPaidCash = rps === 'paid_cash' || rps === 'paid_to_owner';
+              const isPaid = isPaidOnline || isPaidCash;
+
+              if (!isPaid) {
+                // STATE 1 — Remaining payment pending, customer hasn't paid yet
+                return (
+                  <Card className="border-2 border-orange-200 bg-orange-50">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-orange-900 text-base">
+                        <IndianRupee className="w-5 h-5" />
+                        Remaining Payment Pending
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <p className="text-sm text-orange-800">
+                        Customer must pay <strong>₹{booking.remainingAmount}</strong> before you can complete the rental.
+                      </p>
+                      <p className="text-xs text-orange-700">
+                        If the customer paid <strong>online via Razorpay</strong>, it auto-confirms — no action needed from you.<br />
+                        If the customer is <strong>paying cash</strong>, click below to confirm receipt.
+                      </p>
+                      <Button
+                        onClick={handleConfirmCashPayment}
+                        disabled={processingAction}
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                      >
+                        {processingAction ? (
+                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+                        ) : (
+                          <><Banknote className="w-4 h-4 mr-2" /> Confirm Cash Payment (₹{booking.remainingAmount})</>
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              }
+
+              // STATE 2 — Paid online | STATE 3 — Paid cash → show Complete Rental button
+              return (
+                <Card className="border-2 border-indigo-200 bg-indigo-50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-indigo-900 text-base">
+                      <CheckCircle className="w-5 h-5 text-indigo-600" />
+                      Payment Received
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
+                      isPaidOnline ? 'bg-blue-100 text-blue-700 border border-blue-300' : 'bg-green-100 text-green-700 border border-green-300'
+                    }`}>
+                      <CheckCircle className="w-4 h-4" />
+                      {isPaidOnline ? `✔ Remaining Paid Online (₹${booking.remainingAmount})` : `✔ Cash Payment Confirmed (₹${booking.remainingAmount})`}
+                    </div>
+                    <Button
+                      onClick={handleCompleteRental}
+                      disabled={processingAction}
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-6"
+                      size="lg"
+                    >
+                      {processingAction ? (
+                        <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Completing...</>
+                      ) : (
+                        <><CheckCircle className="w-5 h-5 mr-2" /> Complete Rental &amp; Delete Photo</>
+                      )}
+                    </Button>
+                    <p className="text-xs text-center text-gray-500">
+                      This will mark the rental as completed and permanently delete the customer photo.
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })()}
 
             {/* Booking Timeline */}
             <Card>
@@ -531,11 +784,11 @@ export const BookingDetails: React.FC = () => {
                   <Alert className="bg-white border-indigo-200">
                     <Camera className="w-4 h-4 text-indigo-600" />
                     <AlertDescription className="text-sm">
-                      Customer photo verification is required at pickup for security purposes. 
+                      Customer photo verification is required at pickup for security purposes.
                       The photo will be stored temporarily and automatically deleted after rental completion.
                     </AlertDescription>
                   </Alert>
-                  
+
                   <Button
                     onClick={() => navigate(`/owner/verify/${booking.id}`)}
                     className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-6"

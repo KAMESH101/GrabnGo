@@ -7,7 +7,7 @@ import { initializeDatabase } from './services/database';
 import { seedDatabase } from './utils/seedData';
 import { fixCorruptedBookings } from './utils/mockDataGenerator';
 import './leaflet-styles';
-
+import { loadFaceApiModels } from './services/faceMatching';
 // Landing Page
 import { LandingPage } from './pages/LandingPage';
 import { TestAccounts } from './pages/TestAccounts';
@@ -17,6 +17,7 @@ import { CustomerLogin } from './pages/auth/CustomerLogin';
 import { CustomerSignup } from './pages/auth/CustomerSignup';
 import { OwnerLogin } from './pages/auth/OwnerLogin';
 import { OwnerSignup } from './pages/auth/OwnerSignup';
+import { ForgotPassword } from './pages/auth/ForgotPassword';
 import { AdminLogin } from './pages/admin/AdminLogin';
 
 // Customer Pages
@@ -26,6 +27,7 @@ import { ProductDetail } from './pages/customer/ProductDetail';
 import { BookingPage } from './pages/customer/BookingPage';
 import { CustomerDashboard } from './pages/customer/CustomerDashboard';
 import { CustomerBookingDetails } from './pages/customer/CustomerBookingDetails';
+import { CustomerProfile } from './pages/customer/CustomerProfile';
 
 // Owner Pages
 import { OwnerDashboard } from './pages/owner/OwnerDashboard';
@@ -36,6 +38,7 @@ import { BookingManagement } from './pages/owner/BookingManagement';
 import { PhotoVerification } from './pages/owner/PhotoVerification';
 import { BookingDetails } from './pages/owner/BookingDetails';
 import { EditListing } from './pages/owner/EditListing';
+import { OwnerProfile } from './pages/owner/OwnerProfile';
 
 // Admin Pages
 import { AdminDashboard } from './pages/admin/AdminDashboard';
@@ -48,6 +51,8 @@ import { LocationMonitoring } from './pages/admin/LocationMonitoring';
 import { DataConsistency } from './pages/admin/DataConsistency';
 import { MockAccountCreation } from './pages/admin/MockAccountCreation';
 import { PhotoManagement } from './pages/admin/PhotoManagement';
+import { CustomerKycReview } from './pages/admin/CustomerKycReview';
+import { OwnerKycReview } from './pages/admin/OwnerKycReview';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -61,10 +66,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
     return <Navigate to="/" replace />;
   }
 
-  if (!allowedRoles.includes(user.role)) {
-    if (user.role === 'admin') {
+  // Use activeRole for dual-role support, fallback to role for backward compatibility
+  const currentRole = user.activeRole || user.role;
+
+  if (!allowedRoles.includes(currentRole)) {
+    if (currentRole === 'admin') {
       return <Navigate to="/admin/dashboard" replace />;
-    } else if (user.role === 'owner') {
+    } else if (currentRole === 'owner') {
       return <Navigate to="/owner/dashboard" replace />;
     } else {
       return <Navigate to="/customer/home" replace />;
@@ -93,6 +101,10 @@ const router = createBrowserRouter([
     path: '/customer/signup',
     element: <CustomerSignup />,
   },
+  {
+    path: '/customer/forgot-password',
+    element: <ForgotPassword />,
+  },
   // Owner Auth
   {
     path: '/owner/login',
@@ -101,6 +113,10 @@ const router = createBrowserRouter([
   {
     path: '/owner/signup',
     element: <OwnerSignup />,
+  },
+  {
+    path: '/owner/forgot-password',
+    element: <ForgotPassword />,
   },
   // Admin Auth
   {
@@ -129,6 +145,14 @@ const router = createBrowserRouter([
     element: <ProtectedRoute allowedRoles={['customer']}><CustomerDashboard /></ProtectedRoute>,
   },
   {
+    path: '/customer/profile',
+    element: <ProtectedRoute allowedRoles={['customer']}><CustomerProfile /></ProtectedRoute>,
+  },
+  {
+    path: '/customer/bookings/:bookingId',
+    element: <ProtectedRoute allowedRoles={['customer']}><CustomerBookingDetails /></ProtectedRoute>,
+  },
+  {
     path: '/customer/booking-details/:bookingId',
     element: <ProtectedRoute allowedRoles={['customer']}><CustomerBookingDetails /></ProtectedRoute>,
   },
@@ -140,6 +164,10 @@ const router = createBrowserRouter([
   {
     path: '/owner/dashboard',
     element: <ProtectedRoute allowedRoles={['owner']}><OwnerDashboard /></ProtectedRoute>,
+  },
+  {
+    path: '/owner/profile',
+    element: <ProtectedRoute allowedRoles={['owner']}><OwnerProfile /></ProtectedRoute>,
   },
   {
     path: '/owner/create-listing',
@@ -214,6 +242,14 @@ const router = createBrowserRouter([
     path: '/admin/test',
     element: <ProtectedRoute allowedRoles={['admin']}><AdminTest /></ProtectedRoute>,
   },
+  {
+    path: '/admin/kyc/customer',
+    element: <ProtectedRoute allowedRoles={['admin']}><CustomerKycReview /></ProtectedRoute>,
+  },
+  {
+    path: '/admin/kyc/owner',
+    element: <ProtectedRoute allowedRoles={['admin']}><OwnerKycReview /></ProtectedRoute>,
+  },
 ]);
 
 function AppContent() {
@@ -227,16 +263,25 @@ function AppContent() {
 
 export default function App() {
   useEffect(() => {
+    // Always run seedDatabase — it handles product version upgrades
+    // without touching users or bookings
+    initializeDatabase();
+    seedDatabase();
+
+    // Heavy operations run only once per browser session
     const hasInitialized = sessionStorage.getItem('grabngo_initialized');
-    
     if (!hasInitialized) {
       console.log('🚀 [APP] First initialization in this session');
       fixCorruptedBookings(true);
-      initializeDatabase();
-      seedDatabase();
+
+      // Preload face-api.js models from CDN for KYC verification
+      loadFaceApiModels().catch((error: unknown) => {
+        console.warn('[APP] Failed to preload face detection models:', error);
+      });
+
       sessionStorage.setItem('grabngo_initialized', 'true');
     } else {
-      console.log('✅ [APP] Already initialized in this session, skipping seed');
+      console.log('✅ [APP] Already initialized in this session');
     }
   }, []);
 

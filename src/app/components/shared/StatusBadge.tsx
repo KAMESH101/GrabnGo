@@ -8,9 +8,11 @@ interface StatusBadgeProps {
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   // Define variants for all possible statuses
-  const variants: Record<string, { variant: any; label: string }> = {
+  const variants: Record<string, { variant: any; label: string; className?: string }> = {
     // Booking statuses
+    requested: { variant: 'outline', label: 'Requested', className: 'border-amber-400 bg-amber-50 text-amber-700' },
     pending: { variant: 'secondary', label: 'Pending' },
+    approved: { variant: 'outline', label: 'Approved — Pay Advance', className: 'border-blue-400 bg-blue-50 text-blue-700' },
     confirmed: { variant: 'default', label: 'Confirmed' },
     active: { variant: 'default', label: 'Active' },
     completed: { variant: 'outline', label: 'Completed' },
@@ -30,7 +32,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
     label: status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Unknown' 
   };
 
-  const { variant, label } = statusConfig;
+  const { variant, label, className } = statusConfig;
 
-  return <Badge variant={variant}>{label}</Badge>;
+  return <Badge variant={variant} className={className}>{label}</Badge>;
 };

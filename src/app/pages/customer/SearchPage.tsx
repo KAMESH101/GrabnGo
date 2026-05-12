@@ -168,11 +168,13 @@ export const SearchPage: React.FC = () => {
                   className="cursor-pointer hover:shadow-lg transition-shadow overflow-hidden"
                   onClick={() => navigate(`/customer/product/${product.id}`)}
                 >
-                  <img
-                    src={product.images[0]}
-                    alt={product.title}
-                    className="w-full h-48 object-cover"
-                  />
+                  <div className="w-full h-48 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-lg">
+                    <img
+                      src={product.images[0]}
+                      alt={product.title}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                   <CardContent className="p-4">
                     <div className="text-xs text-indigo-600 mb-1">{product.category}</div>
                     <h3 className="mb-2 line-clamp-2">{product.title}</h3>

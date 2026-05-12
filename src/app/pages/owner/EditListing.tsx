@@ -22,14 +22,14 @@ export const EditListing: React.FC = () => {
   const { listingId } = useParams<{ listingId: string }>();
   const { user } = useAuth();
   const { ownerListings, updateListing, isLoading } = useOwnerData(user?.id || '');
-  
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     category: '' as Category | '',
     pricePerDay: '',
     pricePerHour: '',
-    deposit: '',
+    deposit: '0', // Default to 0
     locality: '',
     address: '',
     instructions: '',
@@ -53,7 +53,7 @@ export const EditListing: React.FC = () => {
           category: listing.category,
           pricePerDay: listing.pricePerDay.toString(),
           pricePerHour: listing.pricePerHour?.toString() || '',
-          deposit: listing.deposit.toString(),
+          deposit: (listing.deposit || 0).toString(), // Handle undefined/null deposit
           locality: listing.pickupLocality,
           address: listing.pickupAddress,
           instructions: listing.pickupInstructions || '',
@@ -71,7 +71,7 @@ export const EditListing: React.FC = () => {
     if (!files || files.length === 0) return;
 
     const totalImages = existingImages.length + newImages.length + files.length;
-    
+
     // Validate number of images
     if (totalImages > 5) {
       setImageError('Maximum 5 images allowed');
@@ -125,14 +125,14 @@ export const EditListing: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user || !listingId) {
       toast.error('Invalid request');
       return;
     }
 
     const totalImages = existingImages.length + newImages.length;
-    
+
     // Validate images
     if (totalImages === 0) {
       setImageError('At least one product image is required');
@@ -171,7 +171,7 @@ export const EditListing: React.FC = () => {
         category: formData.category as Category,
         pricePerDay: Number(formData.pricePerDay),
         pricePerHour: formData.pricePerHour ? Number(formData.pricePerHour) : undefined,
-        deposit: Number(formData.deposit),
+        deposit: formData.deposit ? Number(formData.deposit) : 0,
         images: finalImageUrls,
         pickupLocality: formData.locality,
         pickupAddress: formData.address,
@@ -182,7 +182,7 @@ export const EditListing: React.FC = () => {
 
       toast.dismiss();
       toast.success('✅ Listing updated successfully!');
-      
+
       // Navigate back to manage listings after a short delay
       setTimeout(() => navigate('/owner/manage-listings'), 1500);
     } catch (error) {
@@ -223,8 +223,8 @@ export const EditListing: React.FC = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <Label htmlFor="category">Category *</Label>
-                    <Select 
-                      value={formData.category} 
+                    <Select
+                      value={formData.category}
                       onValueChange={(value) => setFormData({ ...formData, category: value as Category })}
                       required
                     >
@@ -305,7 +305,7 @@ export const EditListing: React.FC = () => {
                       <ImageIcon className="w-4 h-4" />
                       Product Images * (Manage product photos)
                     </Label>
-                    
+
                     {/* Existing Images */}
                     {existingImages.length > 0 && (
                       <div>
@@ -416,8 +416,8 @@ export const EditListing: React.FC = () => {
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="locality">Pickup Locality (Reference Only)</Label>
-                        <Select 
-                          value={formData.locality} 
+                        <Select
+                          value={formData.locality}
                           onValueChange={(value) => setFormData({ ...formData, locality: value })}
                           required
                         >
@@ -485,8 +485,8 @@ export const EditListing: React.FC = () => {
                   </div>
 
                   <div className="flex gap-4 pt-4">
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       className="bg-green-600 hover:bg-green-700"
                       disabled={isLoading || allImages.length === 0 || !isLocationConfirmed}
                     >

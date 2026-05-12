@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '../../context/AuthContext';
 import { AdminNavbar } from '../../components/admin/AdminNavbar';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Users, Store, Package, ShoppingBag, CheckCircle, Clock, Camera } from 'lucide-react';
+import { Users, Store, Package, ShoppingBag, CheckCircle, Clock, Camera, FileCheck } from 'lucide-react';
 import {
   getAllUsers,
   getAllProducts,
   getAllBookings,
+  getKycSubmissionsByStatus,
 } from '../../services/database';
 import { User, Product, Booking } from '../../types';
 
@@ -40,14 +41,18 @@ export const AdminDashboard: React.FC = () => {
   };
 
   // Calculate statistics
-  const totalCustomers = users.filter(u => u.role === 'customer').length;
-  const totalOwners = users.filter(u => u.role === 'owner').length;
+  const totalCustomers = users.filter(u => u.roles?.includes('customer')).length;
+  const totalOwners = users.filter(u => u.roles?.includes('owner')).length;
+  const dualRoleUsers = users.filter(u => u.roles && u.roles.length > 1).length;
   const totalProducts = products.length;
   const totalBookings = bookings.length;
-  const activeBookings = bookings.filter(b => 
-    b.status === 'active' || b.status === 'confirmed'
-  ).length;
+  const activeBookings = bookings.filter(b => b.status === 'confirmed' || b.status === 'active').length;
   const completedBookings = bookings.filter(b => b.status === 'completed').length;
+
+  // KYC pending counts
+  const pendingKycSubmissions = getKycSubmissionsByStatus('pending');
+  const pendingCustomerKyc = users.filter(u => u.roles?.includes('customer') && u.customerKycStatus === 'pending').length;
+  const pendingOwnerKyc = users.filter(u => u.roles?.includes('owner') && u.ownerKycStatus === 'pending').length;
 
   const stats = [
     {
@@ -63,6 +68,13 @@ export const AdminDashboard: React.FC = () => {
       icon: Store,
       color: 'text-green-600',
       bg: 'bg-green-100',
+    },
+    {
+      title: 'Dual-Role Users',
+      value: dualRoleUsers,
+      icon: Users,
+      color: 'text-purple-600',
+      bg: 'bg-purple-100',
     },
     {
       title: 'Total Products',
@@ -164,6 +176,38 @@ export const AdminDashboard: React.FC = () => {
             <ShoppingBag className="w-5 h-5 text-indigo-600 mb-2" />
             <p className="font-medium">Manage Bookings</p>
             <p className="text-sm text-gray-500 mt-1">{totalBookings} total</p>
+          </button>
+
+          <button
+            onClick={() => navigate('/admin/kyc/customer')}
+            className="p-4 bg-white border border-gray-200 rounded-lg hover:border-indigo-300 hover:shadow-sm transition-all text-left relative"
+          >
+            <FileCheck className="w-5 h-5 text-blue-600 mb-2" />
+            <p className="font-medium">Customer KYC Review</p>
+            <p className="text-sm text-gray-500 mt-1">
+              {pendingCustomerKyc} pending
+              {pendingCustomerKyc > 0 && (
+                <span className="ml-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-yellow-500 rounded-full">
+                  {pendingCustomerKyc}
+                </span>
+              )}
+            </p>
+          </button>
+
+          <button
+            onClick={() => navigate('/admin/kyc/owner')}
+            className="p-4 bg-white border border-gray-200 rounded-lg hover:border-indigo-300 hover:shadow-sm transition-all text-left relative"
+          >
+            <FileCheck className="w-5 h-5 text-green-600 mb-2" />
+            <p className="font-medium">Owner KYC Review</p>
+            <p className="text-sm text-gray-500 mt-1">
+              {pendingOwnerKyc} pending
+              {pendingOwnerKyc > 0 && (
+                <span className="ml-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-yellow-500 rounded-full">
+                  {pendingOwnerKyc}
+                </span>
+              )}
+            </p>
           </button>
 
           <button

@@ -60,7 +60,7 @@ export const FeatureDemo: React.FC = () => {
           <div className="bg-blue-50 p-4 rounded-lg space-y-2">
             <p className="flex items-start gap-2">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <span><strong>Google Maps Integration:</strong> Static map with pickup location marker</span>
+              <span><strong>Leaflet + OpenStreetMap:</strong> Interactive map with pickup location marker (free, no API key)</span>
             </p>
             <p className="flex items-start gap-2">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -68,7 +68,7 @@ export const FeatureDemo: React.FC = () => {
             </p>
             <p className="flex items-start gap-2">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <span><strong>Get Directions:</strong> Opens Google Maps with navigation</span>
+              <span><strong>Get Directions:</strong> Opens OpenStreetMap with driving navigation</span>
             </p>
             <p className="flex items-start gap-2">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -76,7 +76,7 @@ export const FeatureDemo: React.FC = () => {
             </p>
           </div>
           <div className="text-xs text-gray-600 bg-gray-50 p-3 rounded">
-            <p><strong>Demo Mode:</strong> Static maps shown. In production, use real Google Maps API key for interactive maps</p>
+            <p><strong>Stack:</strong> Leaflet.js + OpenStreetMap tiles + OSRM routing — 100% free, no API key required</p>
           </div>
         </CardContent>
       </Card>

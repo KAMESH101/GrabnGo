@@ -1,16 +1,16 @@
 import { Product, Booking, ChennaiLocality } from '../types';
 
 export const chennaiLocalities: ChennaiLocality[] = [
-  { name: 'T Nagar', area: 'Central' },
-  { name: 'Anna Nagar', area: 'North' },
-  { name: 'Adyar', area: 'South' },
-  { name: 'Velachery', area: 'South' },
-  { name: 'Porur', area: 'West' },
-  { name: 'OMR (Sholinganallur)', area: 'East' },
-  { name: 'Mylapore', area: 'Central' },
-  { name: 'Nungambakkam', area: 'Central' },
-  { name: 'Besant Nagar', area: 'South' },
-  { name: 'Tambaram', area: 'South' },
+  { name: 'T Nagar', area: 'Central', lat: 13.0418, lng: 80.2341 },
+  { name: 'Anna Nagar', area: 'North', lat: 13.0850, lng: 80.2101 },
+  { name: 'Adyar', area: 'South', lat: 13.0067, lng: 80.2206 },
+  { name: 'Velachery', area: 'South', lat: 12.9750, lng: 80.2179 },
+  { name: 'Porur', area: 'West', lat: 13.0358, lng: 80.1558 },
+  { name: 'OMR (Sholinganallur)', area: 'East', lat: 12.9010, lng: 80.2279 },
+  { name: 'Mylapore', area: 'Central', lat: 13.0339, lng: 80.2619 },
+  { name: 'Nungambakkam', area: 'Central', lat: 13.0569, lng: 80.2425 },
+  { name: 'Besant Nagar', area: 'South', lat: 13.0002, lng: 80.2668 },
+  { name: 'Tambaram', area: 'South', lat: 12.9249, lng: 80.1000 },
 ];
 
 export const mockProducts: Product[] = [
@@ -49,7 +49,7 @@ export const mockProducts: Product[] = [
     pickupAddress: '45, 2nd Avenue, Anna Nagar, Chennai - 600040',
     pickupLat: 13.0850,
     pickupLng: 80.2101,
-    pickupInstructions: 'Helmet provided. Please bring driving license.',
+    pickupInstructions: 'Helmet provided. Please bring a valid ID document.',
     availability: true,
   },
   {

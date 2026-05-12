@@ -170,11 +170,13 @@ export const ProductManagement: React.FC = () => {
                       <tr key={product.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <img
-                              src={product.images[0]}
-                              alt={product.title}
-                              className="w-12 h-12 rounded object-cover"
-                            />
+                            <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center overflow-hidden flex-shrink-0">
+                              <img
+                                src={product.images[0]}
+                                alt={product.title}
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
                             <div>
                               <p className="font-medium text-gray-900">{product.title}</p>
                               <code className="text-xs text-gray-400">{product.id}</code>

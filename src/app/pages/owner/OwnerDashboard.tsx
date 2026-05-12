@@ -6,11 +6,16 @@ import { Navbar } from '../../components/shared/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { PlusCircle, Package, Calendar, DollarSign, TrendingUp, Loader2 } from 'lucide-react';
+import { KycModal } from '../../components/kyc/KycModal';
+import { checkOwnerKycStatus } from '../../services/kyc';
+import { toast } from 'sonner';
 
 export const OwnerDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
+  const [showKycModal, setShowKycModal] = React.useState(false);
+
   // Data source: Listings Collection, Bookings Collection
   // Filters: ownerId = loggedInOwner.id
   const { ownerListings, ownerBookings, isLoading } = useOwnerData(user?.id || '');
@@ -22,7 +27,7 @@ export const OwnerDashboard: React.FC = () => {
     monthlyEarnings: ownerBookings
       .filter((b) => b.status === 'completed')
       .reduce((sum, b) => sum + b.totalAmount, 0),
-    pendingApprovals: ownerBookings.filter((b) => b.status === 'pending').length,
+    pendingApprovals: ownerBookings.filter((b) => b.status === 'requested' || b.status === 'pending').length,
   };
 
   // UI State - Loading
@@ -48,7 +53,15 @@ export const OwnerDashboard: React.FC = () => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl">Owner Dashboard</h1>
           <Button
-            onClick={() => navigate('/owner/create-listing')}
+            onClick={() => {
+              // KYC CHECK - Block if owner KYC not verified
+              if (!user || !checkOwnerKycStatus(user)) {
+                toast.error('Please complete Owner KYC to list products');
+                setShowKycModal(true);
+                return;
+              }
+              navigate('/owner/create-listing');
+            }}
             className="bg-green-600 hover:bg-green-700"
           >
             <PlusCircle className="w-5 h-5 mr-2" />
@@ -146,6 +159,17 @@ export const OwnerDashboard: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      {/* KYC Modal */}
+      <KycModal
+        isOpen={showKycModal}
+        role="owner"
+        onClose={() => setShowKycModal(false)}
+        onSuccess={() => {
+          setShowKycModal(false);
+          toast.success('Owner KYC submitted! Waiting for admin approval.');
+        }}
+      />
     </div>
   );
 };
