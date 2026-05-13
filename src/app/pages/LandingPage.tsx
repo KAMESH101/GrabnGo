@@ -32,29 +32,28 @@ export const LandingPage: React.FC = () => {
               />
               <span className="text-xl font-bold text-indigo-600">GrabNGo</span>
             </div>
-            <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-end">
+            <div className="flex items-center gap-2">
               {/* Temporary Admin Access Button */}
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => navigate('/admin/login')}
-                className="text-xs text-gray-400 hover:text-indigo-600 hidden sm:inline-flex"
+                className="text-xs text-gray-400 hover:text-indigo-600"
               >
                 <ShieldCheck className="w-4 h-4 mr-1" />
                 Admin
               </Button>
               <Button 
                 variant="outline"
-                size="sm"
                 onClick={() => navigate('/test-accounts')}
-                className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 text-xs sm:text-sm"
+                className="border-indigo-300 text-indigo-600 hover:bg-indigo-50"
               >
-                🧪 Test
+                🧪 Test Accounts
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/customer/login')}>
+              <Button variant="ghost" onClick={() => navigate('/customer/login')}>
                 Login
               </Button>
-              <Button size="sm" onClick={() => navigate('/customer/signup')} className="bg-indigo-600 hover:bg-indigo-700">
+              <Button onClick={() => navigate('/customer/signup')} className="bg-indigo-600 hover:bg-indigo-700">
                 Get Started
               </Button>
             </div>
@@ -63,19 +62,19 @@ export const LandingPage: React.FC = () => {
       </nav>
 
       {/* Hero */}
-      <div className="container mx-auto px-4 py-8 sm:py-12 md:py-16 text-center">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-4 sm:mb-6">
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h1 className="text-5xl md:text-6xl mb-6">
           Rent Anything,{' '}
           <span className="text-indigo-600">Anytime</span>
         </h1>
-        <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
+        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
           Your trusted rental marketplace in Chennai. From cars to cameras, find everything you need.
         </p>
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-0">
-          <Button size="lg" onClick={() => navigate('/customer/signup')} className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto">
+        <div className="flex gap-4 justify-center flex-wrap">
+          <Button size="lg" onClick={() => navigate('/customer/signup')} className="bg-indigo-600 hover:bg-indigo-700">
             Rent Now
           </Button>
-          <Button size="lg" variant="outline" onClick={() => navigate('/owner/signup')} className="border-green-600 text-green-600 hover:bg-green-50 w-full sm:w-auto">
+          <Button size="lg" variant="outline" onClick={() => navigate('/owner/signup')} className="border-green-600 text-green-600 hover:bg-green-50">
             List Your Items
           </Button>
         </div>
@@ -129,14 +128,14 @@ export const LandingPage: React.FC = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="container mx-auto px-4 py-10 sm:py-16 text-center">
-        <h2 className="text-2xl sm:text-3xl mb-4">Ready to Get Started?</h2>
-        <p className="text-gray-600 mb-6 sm:mb-8">Join thousands of happy customers and owners</p>
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-0">
-          <Button size="lg" onClick={() => navigate('/customer/signup')} className="w-full sm:w-auto">
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h2 className="text-3xl mb-4">Ready to Get Started?</h2>
+        <p className="text-gray-600 mb-8">Join thousands of happy customers and owners</p>
+        <div className="flex gap-4 justify-center">
+          <Button size="lg" onClick={() => navigate('/customer/signup')}>
             Sign Up as Customer
           </Button>
-          <Button size="lg" variant="outline" onClick={() => navigate('/owner/signup')} className="w-full sm:w-auto">
+          <Button size="lg" variant="outline" onClick={() => navigate('/owner/signup')}>
             Sign Up as Owner
           </Button>
         </div>

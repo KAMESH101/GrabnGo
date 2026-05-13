@@ -311,8 +311,8 @@ export const CustomerBookingDetails: React.FC = () => {
 
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl mb-2">Booking Details</h1>
-              <p className="text-gray-600 text-sm sm:text-base break-all">Booking ID: {booking.id}</p>
+              <h1 className="text-3xl mb-2">Booking Details</h1>
+              <p className="text-gray-600">Booking ID: {booking.id}</p>
             </div>
             <StatusBadge status={booking.status} />
           </div>

@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Slider } from '../../components/ui/slider';
 import { Category, Product } from '../../types';
 import { getAvailableProducts } from '../../services/products';
-import { MapPin, Filter, Search, Loader2, SlidersHorizontal, X } from 'lucide-react';
+import { MapPin, Filter, Search, Loader2 } from 'lucide-react';
 
 export const SearchPage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,7 +17,6 @@ export const SearchPage: React.FC = () => {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [filters, setFilters] = useState({
     search: '',
     category: categoryParam || 'all',
@@ -59,7 +58,7 @@ export const SearchPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-4 sm:py-8">
+      <div className="container mx-auto px-4 py-8">
         <div className="flex gap-6">
           {/* Filters Sidebar */}
           <aside className="w-64 hidden md:block">
@@ -137,51 +136,6 @@ export const SearchPage: React.FC = () => {
               </CardContent>
             </Card>
           </aside>
-
-          {/* Mobile Filter Button */}
-            <div className="md:hidden mb-4">
-              <Button
-                variant="outline"
-                className="w-full flex items-center justify-center gap-2"
-                onClick={() => setShowMobileFilters(!showMobileFilters)}
-              >
-                <SlidersHorizontal className="w-4 h-4" />
-                {showMobileFilters ? 'Hide Filters' : 'Show Filters'}
-              </Button>
-            </div>
-
-            {/* Mobile Filters (collapsible) */}
-            {showMobileFilters && (
-              <div className="md:hidden mb-4">
-                <Card>
-                  <CardContent className="p-4 space-y-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="flex items-center gap-2">
-                        <Filter className="w-4 h-4" /> Filters
-                      </h3>
-                      <button onClick={() => setShowMobileFilters(false)}><X className="w-5 h-5 text-gray-400" /></button>
-                    </div>
-                    <div>
-                      <label className="text-sm mb-2 block">Category</label>
-                      <Select value={filters.category} onValueChange={(value) => setFilters({ ...filters, category: value })}>
-                        <SelectTrigger><SelectValue placeholder="All Categories" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Categories</SelectItem>
-                          <SelectItem value="Cars">Cars</SelectItem>
-                          <SelectItem value="Bikes">Bikes</SelectItem>
-                          <SelectItem value="Drones">Drones</SelectItem>
-                          <SelectItem value="Cameras">Cameras</SelectItem>
-                          <SelectItem value="Equipments">Equipments</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Button variant="outline" className="w-full" onClick={() => { setFilters({ search: '', category: 'all', locality: 'all', priceRange: [0, 5000] }); setShowMobileFilters(false); }}>
-                      Clear Filters
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
 
           {/* Results */}
           <div className="flex-1">
