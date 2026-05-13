@@ -86,15 +86,15 @@ export const ProductDetail: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-8">
         <BackButton />
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-6 md:gap-8">
           {/* Image Gallery */}
           <div>
             <Card>
               <CardContent className="p-0">
-                <div className="w-full h-96 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-lg">
+                <div className="w-full h-56 sm:h-72 md:h-96 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-lg">
                   <img
                     src={product.images[selectedImage]}
                     alt={product.title}
@@ -108,11 +108,11 @@ export const ProductDetail: React.FC = () => {
           {/* Product Info */}
           <div>
             <div className="text-sm text-indigo-600 mb-2">{product.category}</div>
-            <h1 className="text-3xl mb-4">{product.title}</h1>
+            <h1 className="text-2xl sm:text-3xl mb-4">{product.title}</h1>
 
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-4 mb-6 flex-wrap">
               <div>
-                <span className="text-4xl text-indigo-600">₹{product.pricePerDay}</span>
+                <span className="text-3xl sm:text-4xl text-indigo-600">₹{product.pricePerDay}</span>
                 <span className="text-gray-600">/day</span>
               </div>
               {product.pricePerHour && (

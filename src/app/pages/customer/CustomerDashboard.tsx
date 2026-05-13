@@ -108,9 +108,9 @@ export const CustomerDashboard: React.FC = () => {
               ) : (
                 upcomingBookings.map((booking, index) => (
                   <Card key={booking.id || `upcoming-${index}`}>
-                    <CardContent className="p-6">
-                      <div className="flex gap-4">
-                        <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="w-full sm:w-32 h-40 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                           <img
                             src={booking.productImage}
                             alt={booking.productTitle}
@@ -118,8 +118,8 @@ export const CustomerDashboard: React.FC = () => {
                           />
                         </div>
                         <div className="flex-1">
-                          <div className="flex justify-between mb-2">
-                            <h3 className="text-xl">{booking.productTitle}</h3>
+                          <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
+                            <h3 className="text-lg sm:text-xl">{booking.productTitle}</h3>
                             <StatusBadge status={booking.status} />
                           </div>
 
@@ -199,7 +199,7 @@ export const CustomerDashboard: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className="flex gap-2">
+                          <div className="flex flex-wrap gap-2">
                             <Button 
                               size="sm" 
                               variant="outline"
@@ -254,9 +254,9 @@ export const CustomerDashboard: React.FC = () => {
               ) : (
                 pastBookings.map((booking, index) => (
                   <Card key={booking.id || `past-${index}`}>
-                    <CardContent className="p-6">
-                      <div className="flex gap-4">
-                        <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="w-full sm:w-32 h-40 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                           <img
                             src={booking.productImage}
                             alt={booking.productTitle}
@@ -264,8 +264,8 @@ export const CustomerDashboard: React.FC = () => {
                           />
                         </div>
                         <div className="flex-1">
-                          <div className="flex justify-between mb-2">
-                            <h3 className="text-xl">{booking.productTitle}</h3>
+                          <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
+                            <h3 className="text-lg sm:text-xl">{booking.productTitle}</h3>
                             <StatusBadge status={booking.status} />
                           </div>
 
@@ -299,7 +299,7 @@ export const CustomerDashboard: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className="flex gap-2">
+                          <div className="flex flex-wrap gap-2">
                             <Button 
                               size="sm" 
                               variant="outline"

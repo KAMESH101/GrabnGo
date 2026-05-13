@@ -1,0 +1,25 @@
+/* ─── Global Responsive Overrides ──────────────────────────────────────────── */
+/* Prevents horizontal scroll on all devices */
+html, body {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Ensure all images are responsive by default */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Ensure inputs are full-width and readable on mobile */
+@media (max-width: 640px) {
+  input, textarea, select {
+    font-size: 16px !important; /* prevents iOS zoom on focus */
+  }
+}
+
+/* Ensure Leaflet map containers are responsive */
+.leaflet-container {
+  width: 100% !important;
+  max-width: 100%;
+}
