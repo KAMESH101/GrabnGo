@@ -388,5 +388,5 @@ This project is developed as a **college project** for educational purposes.
 ---
 
 <p align="center">
-  Built with ❤️ by <strong>KAMESH</strong>
+  Built with  by <strong>KAMESH</strong>
 </p>
