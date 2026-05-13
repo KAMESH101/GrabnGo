@@ -45,7 +45,7 @@ The platform enforces a structured booking lifecycle (`Requested → Approved �
 
 ## 🌐 Live Demo
 
-**Production:** [https://grab-n-go-kamesh.vercel.app](https://grab-n-go-kamesh.vercel.app)
+**Production:** [https://grabn-go-six.vercel.app](https://grabn-go-six.vercel.app)
 
 > The app is deployed on Vercel with serverless payment APIs. All features including payments and KYC work in the live demo.
 
